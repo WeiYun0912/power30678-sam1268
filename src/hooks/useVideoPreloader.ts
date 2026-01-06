@@ -1,17 +1,19 @@
 import { useState, useEffect, useCallback } from 'react'
 
+const BASE = import.meta.env.BASE_URL
+
 // 所有需要預載的影片
 const ALL_VIDEOS = [
   // 第二關
-  '/超負荷挺Toyz.mp4',
-  '/太LOW了.mp4',
-  '/溝通溝通.mp4',
-  '/哭蕊宿頭.mp4',
+  `${BASE}超負荷挺Toyz.mp4`,
+  `${BASE}太LOW了.mp4`,
+  `${BASE}溝通溝通.mp4`,
+  `${BASE}哭蕊宿頭.mp4`,
   // 第三關
-  '/斗影片.mp4',
-  '/你拉一下啊.mp4',
-  '/獲得華.mp4',
-  '/MC.mp4',
+  `${BASE}斗影片.mp4`,
+  `${BASE}你拉一下啊.mp4`,
+  `${BASE}獲得華.mp4`,
+  `${BASE}MC.mp4`,
 ]
 
 interface PreloadState {

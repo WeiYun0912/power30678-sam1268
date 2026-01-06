@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { QTEEvent } from "../types/game";
 import { PopupVideo } from "./PopupVideo";
 
+const BASE = import.meta.env.BASE_URL
+
 // QTE 時間點設定 - 更密集，同時出現多個
 const QTE_EVENTS: QTEEvent[] = [
     // 開場熱身 - 密集單個
@@ -54,12 +56,12 @@ const QTE_EVENTS: QTEEvent[] = [
 const DISTRACTION_TIMES = [4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46];
 
 // 干擾影片列表
-const DISTRACTION_VIDEOS = ["/溝通溝通.mp4", "/哭蕊宿頭.mp4"];
+const DISTRACTION_VIDEOS = [`${BASE}溝通溝通.mp4`, `${BASE}哭蕊宿頭.mp4`];
 
 // 失敗時顯示的影片
 // const FAIL_VIDEOS = ["/哭蕊宿頭.mp4", "/溝通溝通.mp4"];
 
-const FAIL_VIDEOS = ["/太LOW了.mp4"];
+const FAIL_VIDEOS = [`${BASE}太LOW了.mp4`];
 function getRandomLetter(): string {
     const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     return letters[Math.floor(Math.random() * letters.length)];
@@ -440,7 +442,7 @@ export function QTEGame({ onComplete }: QTEGameProps) {
             {/* 影片播放器 */}
             <motion.video
                 ref={videoRef}
-                src="/超負荷挺Toyz.mp4"
+                src={`${BASE}超負荷挺Toyz.mp4`}
                 autoPlay
                 playsInline
                 onLoadedMetadata={() => {

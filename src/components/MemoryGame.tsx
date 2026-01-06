@@ -3,14 +3,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "../types/game";
 import { useAudio } from "../hooks/useAudio";
 
+const BASE = import.meta.env.BASE_URL
+
 // 動態載入素材
 const ASSETS = [
-    { id: "1", image: "/assets/images/22222.png", sound: "/assets/sounds/22222.mp3" },
-    { id: "2", image: "/assets/images/獲得華.png", sound: "/assets/sounds/獲得華.mp3" },
-    { id: "3", image: "/assets/images/MC.png", sound: "/assets/sounds/MC.mp3" },
-    { id: "4", image: "/assets/images/RRRRRR.png", sound: "/assets/sounds/RRRRRR.mp3" },
-    { id: "5", image: "/assets/images/超負荷挺toyz.png", sound: "/assets/sounds/超負荷挺toyz.mp3" },
-    { id: "6", image: "/assets/images/溝通溝通.png", sound: "/assets/sounds/溝通溝通.mp3" },
+    { id: "1", image: `${BASE}assets/images/22222.png`, sound: `${BASE}assets/sounds/22222.mp3` },
+    { id: "2", image: `${BASE}assets/images/獲得華.png`, sound: `${BASE}assets/sounds/獲得華.mp3` },
+    { id: "3", image: `${BASE}assets/images/MC.png`, sound: `${BASE}assets/sounds/MC.mp3` },
+    { id: "4", image: `${BASE}assets/images/RRRRRR.png`, sound: `${BASE}assets/sounds/RRRRRR.mp3` },
+    { id: "5", image: `${BASE}assets/images/超負荷挺toyz.png`, sound: `${BASE}assets/sounds/超負荷挺toyz.mp3` },
+    { id: "6", image: `${BASE}assets/images/溝通溝通.png`, sound: `${BASE}assets/sounds/溝通溝通.mp3` },
 ];
 
 // 計算響應式卡片大小
@@ -58,7 +60,7 @@ interface MemoryGameProps {
 }
 
 // 失敗時隨機播放的影片
-const FAIL_VIDEOS = ["/溝通溝通.mp4", "/哭蕊宿頭.mp4"];
+const FAIL_VIDEOS = [`${BASE}溝通溝通.mp4`, `${BASE}哭蕊宿頭.mp4`];
 
 export function MemoryGame({ onComplete, onFail, maxFails = 3 }: MemoryGameProps) {
     const [cards, setCards] = useState<Card[]>([]);

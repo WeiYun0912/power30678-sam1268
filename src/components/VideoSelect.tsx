@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion'
 
+const BASE = import.meta.env.BASE_URL
+
 interface VideoSelectProps {
   onSelect: (video: string) => void
 }
 
 const videos = [
-  { id: 'A', name: '哭蕊宿頭', src: '/哭蕊宿頭.mp4' },
-  { id: 'B', name: '溝通溝通', src: '/溝通溝通.mp4' },
+  { id: 'A', name: '哭蕊宿頭', src: `${BASE}哭蕊宿頭.mp4` },
+  { id: 'B', name: '溝通溝通', src: `${BASE}溝通溝通.mp4` },
 ]
 
 export function VideoSelect({ onSelect }: VideoSelectProps) {

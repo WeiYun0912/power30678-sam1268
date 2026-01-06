@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+const BASE = import.meta.env.BASE_URL
+
 // 會隨機出現的影片
-const GAME_VIDEOS = ["/哭蕊宿頭.mp4", "/溝通溝通.mp4", "/獲得華.mp4", "/MC.mp4"];
+const GAME_VIDEOS = [`${BASE}哭蕊宿頭.mp4`, `${BASE}溝通溝通.mp4`, `${BASE}獲得華.mp4`, `${BASE}MC.mp4`];
 
 // 邊界設定（響應式）
 const getBoundaryMargin = () => (window.innerWidth < 600 ? 80 : 200);
@@ -282,7 +284,7 @@ export function DragGame({ onComplete }: DragGameProps) {
                     >
                         <video
                             ref={introVideoRef}
-                            src="/斗影片.mp4"
+                            src={`${BASE}斗影片.mp4`}
                             style={{
                                 maxWidth: "90%",
                                 maxHeight: isMobile ? "70vh" : "90%",
@@ -383,7 +385,7 @@ export function DragGame({ onComplete }: DragGameProps) {
                     >
                         <video
                             ref={bonusVideoRef}
-                            src="/你拉一下啊.mp4"
+                            src={`${BASE}你拉一下啊.mp4`}
                             style={{
                                 width: isMobile ? "min(90vw, 300px)" : 400,
                                 height: "auto",

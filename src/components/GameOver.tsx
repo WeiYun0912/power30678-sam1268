@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 
+const BASE = import.meta.env.BASE_URL
+
 interface GameOverProps {
     onRestart: () => void;
     nextChances?: number; // 下次重試時的機會次數
@@ -39,7 +41,7 @@ export function GameOver({ onRestart, nextChances }: GameOverProps) {
             {/* 背景影片 - 無限循環 */}
             <video
                 ref={videoRef}
-                src="/太LOW了.mp4"
+                src={`${BASE}太LOW了.mp4`}
                 autoPlay
                 loop
                 playsInline

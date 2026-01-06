@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 
+const BASE = import.meta.env.BASE_URL
+
 interface CompleteProps {
     onRestart: () => void;
 }
@@ -106,7 +108,7 @@ export function Complete({ onRestart }: CompleteProps) {
                 }}
             >
                 <img
-                    src="/assets/images/2026新年目標.jpg"
+                    src={`${BASE}assets/images/2026新年目標.jpg`}
                     alt="2026 新年目標"
                     style={{
                         width: "100%",
