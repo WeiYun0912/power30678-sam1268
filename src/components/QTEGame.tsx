@@ -5,34 +5,49 @@ import { PopupVideo } from "./PopupVideo";
 
 // QTE 時間點設定 - 更密集，同時出現多個
 const QTE_EVENTS: QTEEvent[] = [
-    // 第一波 - 單個
+    // 開場熱身 - 密集單個
+    { time: 1.5, key: "", duration: 2500 },
     { time: 3, key: "", duration: 2500 },
+    { time: 4.5, key: "", duration: 2200 },
+    { time: 6, key: "", duration: 2000 },
     // 第二波 - 2個同時
     { time: 8, key: "", duration: 2000 },
     { time: 8.1, key: "", duration: 2800 },
+    // 再來幾個單獨的
+    { time: 10, key: "", duration: 2000 },
+    { time: 12, key: "", duration: 1800 },
     // 第三波 - 3個同時
     { time: 14, key: "", duration: 1800 },
     { time: 14.1, key: "", duration: 2500 },
     { time: 14.2, key: "", duration: 3200 },
+    // 單獨補充
+    { time: 17, key: "", duration: 2000 },
+    { time: 19, key: "", duration: 1800 },
     // 第四波 - 2個同時
     { time: 21, key: "", duration: 1500 },
     { time: 21.1, key: "", duration: 2200 },
+    // 單獨補充
+    { time: 24, key: "", duration: 1800 },
+    { time: 26, key: "", duration: 1600 },
     // 第五波 - 4個同時
     { time: 28, key: "", duration: 1500 },
     { time: 28.1, key: "", duration: 2000 },
     { time: 28.2, key: "", duration: 2800 },
     { time: 28.3, key: "", duration: 3500 },
+    // 單獨補充
+    { time: 32, key: "", duration: 1500 },
     // 第六波 - 3個同時
     { time: 35, key: "", duration: 1200 },
     { time: 35.1, key: "", duration: 1800 },
     { time: 35.2, key: "", duration: 2500 },
+    // 單獨補充
+    { time: 38, key: "", duration: 1500 },
+    { time: 40, key: "", duration: 1400 },
     // 最終波 - 4個同時
     { time: 42, key: "", duration: 1000 },
     { time: 42.1, key: "", duration: 1500 },
     { time: 42.2, key: "", duration: 2000 },
     { time: 42.3, key: "", duration: 2800 },
-    // 補一個事件以確保可達 20 分
-    { time: 42.35, key: "", duration: 2400 },
 ];
 
 // 干擾影片出現的時間點（秒）- 更密集
@@ -401,7 +416,7 @@ export function QTEGame({ onComplete }: QTEGameProps) {
                 src="/超負荷挺Toyz.mp4"
                 autoPlay
                 onLoadedMetadata={() => {
-                    if (videoRef.current) videoRef.current.volume = 0.35;
+                    if (videoRef.current) videoRef.current.volume = 0.25;
                 }}
                 style={{
                     maxWidth: "85%",

@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 const GAME_VIDEOS = ['/哭蕊宿頭.mp4', '/溝通溝通.mp4', '/獲得華.mp4', '/MC.mp4']
 
 // 邊界設定
-const BOUNDARY_MARGIN = 80 // 邊界距離螢幕邊緣的距離
-const VIDEO_SIZE = 150 // 影片大小
+const BOUNDARY_MARGIN = 200 // 邊界距離螢幕邊緣的距離（更小的邊界）
+const VIDEO_SIZE = 100 // 影片大小
+const TARGET_SCORE = 35 // 過關分數
 
 interface DraggableVideo {
   id: number
@@ -27,8 +28,10 @@ export function DragGame({ onComplete }: DragGameProps) {
   const [videos, setVideos] = useState<DraggableVideo[]>([])
   const [bonusUsed, setBonusUsed] = useState(false)
   const [showBonusEffect, setShowBonusEffect] = useState(false)
+  const [showBonusVideo, setShowBonusVideo] = useState(false)
+  const [draggingId, setDraggingId] = useState<number | null>(null) // 正在拖拉的影片 ID
   const introVideoRef = useRef<HTMLVideoElement>(null)
-  const bonusAudioRef = useRef<HTMLAudioElement>(null)
+  const bonusVideoRef = useRef<HTMLVideoElement>(null)
   const animationRef = useRef<number>()
   const videoIdRef = useRef(0)
 
@@ -57,6 +60,7 @@ export function DragGame({ onComplete }: DragGameProps) {
   // 播放開場影片
   useEffect(() => {
     if (phase === 'intro' && introVideoRef.current) {
+      introVideoRef.current.volume = 0.3
       introVideoRef.current.play().catch(() => {})
 
       const video = introVideoRef.current
@@ -75,16 +79,22 @@ export function DragGame({ onComplete }: DragGameProps) {
     const id = videoIdRef.current++
     const src = GAME_VIDEOS[Math.floor(Math.random() * GAME_VIDEOS.length)]
 
-    // 計算可用區域（邊界內，留出影片大小的空間）
-    const minX = boundary.left + 20
-    const maxX = boundary.right - VIDEO_SIZE - 20
-    const minY = boundary.top + 80 // 留空間給標題
-    const maxY = boundary.bottom - VIDEO_SIZE - 20
+    // 計算可用區域（完全在邊界內）
+    const padding = 30
+    const headerSpace = 100 // 標題空間
+    const minX = boundary.left + padding
+    const maxX = boundary.right - VIDEO_SIZE - padding
+    const minY = boundary.top + headerSpace
+    const maxY = boundary.bottom - VIDEO_SIZE - padding
 
-    const x = minX + Math.random() * Math.max(0, maxX - minX)
-    const y = minY + Math.random() * Math.max(0, maxY - minY)
+    // 確保有足夠空間
+    const rangeX = Math.max(1, maxX - minX)
+    const rangeY = Math.max(1, maxY - minY)
 
-    const speed = 1.5 + Math.random() * 1.5
+    const x = minX + Math.random() * rangeX
+    const y = minY + Math.random() * rangeY
+
+    const speed = 2 + Math.random() * 2
     const angle = Math.random() * Math.PI * 2
     const vx = Math.cos(angle) * speed
     const vy = Math.sin(angle) * speed
@@ -95,19 +105,22 @@ export function DragGame({ onComplete }: DragGameProps) {
   // 遊戲開始時生成影片
   useEffect(() => {
     if (phase === 'playing') {
-      // 初始生成 3 個影片
-      const initialVideos = Array.from({ length: 3 }, () => spawnVideo())
+      // 初始生成 5 個影片
+      const initialVideos = Array.from({ length: 5 }, () => spawnVideo())
       setVideos(initialVideos)
 
-      // 每 3 秒生成新影片（最多 6 個）
+      // 每 1.5 秒生成新影片（最多 10 個）
       const spawnInterval = setInterval(() => {
         setVideos(prev => {
-          if (prev.length < 6) {
-            return [...prev, spawnVideo()]
+          if (prev.length < 10) {
+            // 一次生成 1-2 個
+            const count = Math.random() > 0.5 ? 2 : 1
+            const newVideos = Array.from({ length: count }, () => spawnVideo())
+            return [...prev, ...newVideos].slice(0, 10)
           }
           return prev
         })
-      }, 3000)
+      }, 1500)
 
       return () => clearInterval(spawnInterval)
     }
@@ -119,6 +132,11 @@ export function DragGame({ onComplete }: DragGameProps) {
 
     const animate = () => {
       setVideos(prev => prev.map(video => {
+        // 如果正在拖拉這個影片，不更新位置
+        if (video.id === draggingId) {
+          return video
+        }
+
         let { x, y, vx, vy } = video
 
         // 更新位置
@@ -126,10 +144,11 @@ export function DragGame({ onComplete }: DragGameProps) {
         y += vy
 
         // 邊界碰撞檢測（確保在邊界內反彈）
-        const minX = boundary.left + 10
-        const maxX = boundary.right - VIDEO_SIZE - 10
-        const minY = boundary.top + 10
-        const maxY = boundary.bottom - VIDEO_SIZE - 10
+        const padding = 20
+        const minX = boundary.left + padding
+        const maxX = boundary.right - VIDEO_SIZE - padding
+        const minY = boundary.top + padding
+        const maxY = boundary.bottom - VIDEO_SIZE - padding
 
         if (x <= minX || x >= maxX) {
           vx = -vx
@@ -152,25 +171,34 @@ export function DragGame({ onComplete }: DragGameProps) {
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [phase, boundary])
+  }, [phase, boundary, draggingId])
 
-  // 檢查影片是否被拉出邊界
+  // 檢查影片是否被拉出邊界（更精準的檢測）
   const checkOutOfBounds = useCallback((id: number, x: number, y: number) => {
-    const isOutside = x < boundary.left - 50 ||
-                      x > boundary.right + 50 ||
-                      y < boundary.top - 50 ||
-                      y > boundary.bottom + 50
+    // 用影片中心點來判斷是否超出邊界
+    const centerX = x + VIDEO_SIZE / 2
+    const centerY = y + VIDEO_SIZE / 2
+
+    const isOutside = centerX < boundary.left ||
+                      centerX > boundary.right ||
+                      centerY < boundary.top ||
+                      centerY > boundary.bottom
 
     if (isOutside) {
       // 移除影片並加分
       setVideos(prev => prev.filter(v => v.id !== id))
       setScore(prev => {
         const next = prev + 1
-        if (next >= 50) {
+        if (next >= TARGET_SCORE) {
           onComplete()
         }
         return next
       })
+    } else {
+      // 沒有拉出邊界，更新影片位置以避免跳回原位
+      setVideos(prev => prev.map(v =>
+        v.id === id ? { ...v, x, y } : v
+      ))
     }
   }, [boundary, onComplete])
 
@@ -179,21 +207,25 @@ export function DragGame({ onComplete }: DragGameProps) {
     if (bonusUsed) return
     setBonusUsed(true)
 
-    // 顯示放大絕招效果
+    // 顯示放大絕招效果和影片
     setShowBonusEffect(true)
+    setShowBonusVideo(true)
 
-    // 播放音效
-    if (bonusAudioRef.current) {
-      bonusAudioRef.current.play().catch(() => {})
-    }
+    // 播放影片
+    setTimeout(() => {
+      if (bonusVideoRef.current) {
+        bonusVideoRef.current.volume = 0.35
+        bonusVideoRef.current.play().catch(() => {})
+      }
+    }, 100)
 
     // 清除所有影片並加 10 分
     setTimeout(() => {
       setVideos([])
       setScore(prev => {
         const next = prev + 10
-        if (next >= 50) {
-          setTimeout(() => onComplete(), 500)
+        if (next >= TARGET_SCORE) {
+          setTimeout(() => onComplete(), 1000)
         }
         return next
       })
@@ -203,6 +235,11 @@ export function DragGame({ onComplete }: DragGameProps) {
     setTimeout(() => {
       setShowBonusEffect(false)
     }, 1500)
+
+    // 隱藏影片
+    setTimeout(() => {
+      setShowBonusVideo(false)
+    }, 3000)
   }, [bonusUsed, onComplete])
 
   return (
@@ -249,9 +286,6 @@ export function DragGame({ onComplete }: DragGameProps) {
         )}
       </AnimatePresence>
 
-      {/* BONUS 音效 */}
-      <audio ref={bonusAudioRef} src="/你拉一下啊.mp4" preload="auto" />
-
       {/* BONUS 放大絕招效果 */}
       <AnimatePresence>
         {showBonusEffect && (
@@ -271,6 +305,7 @@ export function DragGame({ onComplete }: DragGameProps) {
               justifyContent: 'center',
               zIndex: 200,
               pointerEvents: 'none',
+              background: 'rgba(0,0,0,0.5)',
             }}
           >
             {/* 閃光背景 */}
@@ -315,6 +350,39 @@ export function DragGame({ onComplete }: DragGameProps) {
             >
               +10 分！
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* BONUS 影片 - 置中顯示 */}
+      <AnimatePresence>
+        {showBonusVideo && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 250,
+              borderRadius: 16,
+              overflow: 'hidden',
+              border: '4px solid #F59E0B',
+              boxShadow: '0 0 80px rgba(245, 158, 11, 0.6), 0 20px 60px rgba(0,0,0,0.8)',
+            }}
+          >
+            <video
+              ref={bonusVideoRef}
+              src="/你拉一下啊.mp4"
+              style={{
+                width: 400,
+                height: 'auto',
+                display: 'block',
+              }}
+              playsInline
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -413,7 +481,7 @@ export function DragGame({ onComplete }: DragGameProps) {
               拉影片挑戰
             </motion.h2>
             <div style={{ color: '#71717A', fontSize: 14 }}>
-              分數：<span style={{ color: '#F59E0B', fontWeight: 700 }}>{score}</span> / 50
+              分數：<span style={{ color: '#F59E0B', fontWeight: 700 }}>{score}</span> / {TARGET_SCORE}
             </div>
           </div>
 
@@ -454,7 +522,11 @@ export function DragGame({ onComplete }: DragGameProps) {
               <DraggableVideoItem
                 key={video.id}
                 video={video}
-                onDragEnd={(x, y) => checkOutOfBounds(video.id, x, y)}
+                onDragStart={() => setDraggingId(video.id)}
+                onDragEnd={(x, y) => {
+                  setDraggingId(null)
+                  checkOutOfBounds(video.id, x, y)
+                }}
               />
             ))}
           </AnimatePresence>
@@ -467,75 +539,90 @@ export function DragGame({ onComplete }: DragGameProps) {
 // 可拖拉的影片組件
 interface DraggableVideoItemProps {
   video: DraggableVideo
+  onDragStart: () => void
   onDragEnd: (x: number, y: number) => void
 }
 
-function DraggableVideoItem({ video, onDragEnd }: DraggableVideoItemProps) {
+function DraggableVideoItem({ video, onDragStart, onDragEnd }: DraggableVideoItemProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const elementRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
-  const dragOffsetRef = useRef({ x: 0, y: 0 })
+  const dragStartRef = useRef({ mouseX: 0, mouseY: 0, elemX: 0, elemY: 0 })
 
   useEffect(() => {
     if (videoRef.current) {
+      videoRef.current.volume = 0.15 // 小聲播放
       videoRef.current.play().catch(() => {})
     }
   }, [])
 
-  // 當不在拖拉時，跟隨 video 的位置
-  useEffect(() => {
-    if (!isDragging && containerRef.current) {
-      containerRef.current.style.transform = `translate(${video.x}px, ${video.y}px)`
+  const handlePointerDown = (e: React.PointerEvent) => {
+    e.preventDefault()
+    e.currentTarget.setPointerCapture(e.pointerId)
+    setIsDragging(true)
+    onDragStart()
+    // 記住拖拉開始時的位置
+    dragStartRef.current = {
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      elemX: video.x,
+      elemY: video.y,
     }
-  }, [video.x, video.y, isDragging])
+  }
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging || !elementRef.current) return
+    const dx = e.clientX - dragStartRef.current.mouseX
+    const dy = e.clientY - dragStartRef.current.mouseY
+    const newX = dragStartRef.current.elemX + dx
+    const newY = dragStartRef.current.elemY + dy
+    // 直接更新 DOM 位置
+    elementRef.current.style.left = `${newX}px`
+    elementRef.current.style.top = `${newY}px`
+  }
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isDragging) return
+    const dx = e.clientX - dragStartRef.current.mouseX
+    const dy = e.clientY - dragStartRef.current.mouseY
+    const finalX = dragStartRef.current.elemX + dx
+    const finalY = dragStartRef.current.elemY + dy
+    setIsDragging(false)
+    onDragEnd(finalX, finalY)
+  }
 
   return (
     <motion.div
-      ref={containerRef}
-      drag
-      dragMomentum={false}
-      dragElastic={0}
-      onDragStart={() => {
-        setIsDragging(true)
-        dragOffsetRef.current = { x: 0, y: 0 }
-      }}
-      onDrag={(_, info) => {
-        dragOffsetRef.current = { x: info.offset.x, y: info.offset.y }
-      }}
-      onDragEnd={() => {
-        setIsDragging(false)
-        const finalX = video.x + dragOffsetRef.current.x
-        const finalY = video.y + dragOffsetRef.current.y
-        onDragEnd(finalX, finalY)
-      }}
+      ref={elementRef}
       initial={{ opacity: 0, scale: 0 }}
-      animate={{
-        opacity: 1,
-        scale: isDragging ? 1.1 : 1,
-      }}
+      animate={{ opacity: 1, scale: isDragging ? 1.1 : 1 }}
       exit={{ opacity: 0, scale: 0 }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
       style={{
         position: 'absolute',
-        left: 0,
-        top: 0,
+        left: video.x,
+        top: video.y,
         width: VIDEO_SIZE,
         height: VIDEO_SIZE,
         borderRadius: 12,
         overflow: 'hidden',
-        cursor: 'grab',
+        cursor: isDragging ? 'grabbing' : 'grab',
         border: isDragging ? '3px solid #F59E0B' : '1px solid rgba(255,255,255,0.1)',
         boxShadow: isDragging
           ? '0 0 40px rgba(245, 158, 11, 0.4)'
           : '0 10px 30px rgba(0,0,0,0.5)',
         zIndex: isDragging ? 50 : 10,
+        touchAction: 'none',
+        userSelect: 'none',
       }}
-      whileTap={{ cursor: 'grabbing' }}
     >
       <video
         ref={videoRef}
         src={video.src}
         loop
-        muted
         playsInline
         style={{
           width: '100%',

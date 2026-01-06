@@ -219,7 +219,7 @@ export function Menu({ onStart }: MenuProps) {
                 style={{
                     position: "absolute",
                     bottom: 20,
-                    color: "#52525B",
+                    color: "yellow",
                     fontSize: 12,
                     textDecoration: "none",
                     transition: "color 200ms ease-out",

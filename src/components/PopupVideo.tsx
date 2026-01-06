@@ -16,6 +16,7 @@ export function PopupVideo({ src, x, y, onClose, showCloseButton = false, autoCl
 
   useEffect(() => {
     if (videoRef.current) {
+      videoRef.current.volume = 0.3
       videoRef.current.play().catch(() => {})
     }
   }, [])

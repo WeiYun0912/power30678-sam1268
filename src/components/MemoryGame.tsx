@@ -357,6 +357,9 @@ export function MemoryGame({ onComplete, onFail, maxFails = 3 }: MemoryGameProps
                             src={failVideoSrc}
                             autoPlay
                             muted={false}
+                            onLoadedMetadata={(e) => {
+                                (e.target as HTMLVideoElement).volume = 0.3;
+                            }}
                             style={{
                                 width: 280,
                                 height: "auto",
