@@ -8,6 +8,6 @@
 
 專案大小會稍微大一點 因為把所有素材都放進來了
 
-可能會有點 latency 因為是放在 vercel hk
+第一關一開始可能會有點 latency
 
 <img width="863" height="296" alt="哭蕊宿頭" src="https://github.com/user-attachments/assets/613168bc-200e-40bf-b7af-9c0d12e276c2" />
