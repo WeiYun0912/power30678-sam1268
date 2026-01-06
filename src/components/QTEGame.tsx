@@ -66,9 +66,12 @@ function getRandomLetter(): string {
 }
 
 function getRandomPosition() {
+    const isMobile = window.innerWidth < 600;
+    const padding = isMobile ? 20 : 50;
+    const videoWidth = isMobile ? 200 : 300;
     return {
-        x: 50 + Math.random() * (window.innerWidth - 400),
-        y: 50 + Math.random() * (window.innerHeight - 300),
+        x: padding + Math.random() * (window.innerWidth - videoWidth - padding * 2),
+        y: padding + Math.random() * (window.innerHeight - 250),
     };
 }
 
@@ -94,12 +97,18 @@ interface ActiveQTE {
 }
 
 function getRandomQTEPosition(existingPositions: { x: number; y: number }[]) {
+    const isMobile = window.innerWidth < 600;
+    const buttonSize = isMobile ? 70 : 90;
+    const padding = isMobile ? 20 : 50;
+    const headerSpace = isMobile ? 100 : 120;
+    const minGap = buttonSize + 20;
+
     // 嘗試找一個不重疊的位置
     for (let attempt = 0; attempt < 10; attempt++) {
-        const x = 50 + Math.random() * (window.innerWidth - 200);
-        const y = 80 + Math.random() * (window.innerHeight - 250);
+        const x = padding + Math.random() * (window.innerWidth - buttonSize - padding * 2);
+        const y = headerSpace + Math.random() * (window.innerHeight - buttonSize - headerSpace - padding);
 
-        const overlaps = existingPositions.some((pos) => Math.abs(pos.x - x) < 140 && Math.abs(pos.y - y) < 140);
+        const overlaps = existingPositions.some((pos) => Math.abs(pos.x - x) < minGap && Math.abs(pos.y - y) < minGap);
 
         if (!overlaps || existingPositions.length === 0) {
             return { x, y };
@@ -107,8 +116,8 @@ function getRandomQTEPosition(existingPositions: { x: number; y: number }[]) {
     }
     // 如果找不到，就隨機放
     return {
-        x: 50 + Math.random() * (window.innerWidth - 200),
-        y: 80 + Math.random() * (window.innerHeight - 250),
+        x: padding + Math.random() * (window.innerWidth - buttonSize - padding * 2),
+        y: headerSpace + Math.random() * (window.innerHeight - buttonSize - headerSpace - padding),
     };
 }
 
@@ -123,9 +132,17 @@ export function QTEGame({ onComplete }: QTEGameProps) {
     const [triggeredDistractions, setTriggeredDistractions] = useState<number[]>([]);
     const [popupVideos, setPopupVideos] = useState<PopupVideoState[]>([]);
     const [score, setScore] = useState(0);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 600);
 
     const qteTimersRef = useRef<Map<number, { timeout: number; interval: number }>>(new Map());
     const popupIdRef = useRef(0);
+
+    // 監聽視窗大小變化
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 600);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     // 初始化 QTE 事件的隨機字母（確保同時出現的 QTE 字母不重複）
     const [qteEvents] = useState(() => {
@@ -333,6 +350,8 @@ export function QTEGame({ onComplete }: QTEGameProps) {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [activeQTEs, handleQTESuccess]);
 
+    const qteButtonSize = isMobile ? 70 : 90;
+
     return (
         <div
             style={{
@@ -345,6 +364,8 @@ export function QTEGame({ onComplete }: QTEGameProps) {
                 background: "#0A0A0F",
                 position: "relative",
                 overflow: "hidden",
+                padding: isMobile ? "10px" : "20px",
+                boxSizing: "border-box",
             }}
         >
             {/* Ambient glow */}
@@ -354,8 +375,8 @@ export function QTEGame({ onComplete }: QTEGameProps) {
                     top: "50%",
                     left: "50%",
                     transform: "translate(-50%, -50%)",
-                    width: 800,
-                    height: 600,
+                    width: "min(800px, 100vw)",
+                    height: "min(600px, 80vh)",
                     background: "radial-gradient(ellipse, rgba(245, 158, 11, 0.04) 0%, transparent 60%)",
                     pointerEvents: "none",
                 }}
@@ -365,12 +386,15 @@ export function QTEGame({ onComplete }: QTEGameProps) {
             <div
                 style={{
                     position: "absolute",
-                    top: 24,
+                    top: isMobile ? 10 : 24,
                     display: "flex",
-                    flexDirection: "column",
+                    flexDirection: isMobile ? "row" : "column",
                     alignItems: "center",
-                    gap: 8,
+                    gap: isMobile ? 12 : 8,
                     zIndex: 10,
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    padding: "0 10px",
                 }}
             >
                 <motion.div
@@ -380,32 +404,35 @@ export function QTEGame({ onComplete }: QTEGameProps) {
                         display: "flex",
                         alignItems: "center",
                         gap: 8,
-                        padding: "6px 14px",
+                        padding: isMobile ? "4px 10px" : "6px 14px",
                         background: "rgba(245, 158, 11, 0.1)",
                         border: "1px solid rgba(245, 158, 11, 0.2)",
                         borderRadius: 9999,
-                        fontSize: 13,
+                        fontSize: "clamp(11px, 2.5vw, 13px)",
                         color: "#F59E0B",
                         fontWeight: 500,
                     }}
                 >
                     第二關
                 </motion.div>
-                <motion.h2
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    style={{
-                        color: "#FAFAFA",
-                        fontSize: 28,
-                        fontWeight: 700,
-                        fontFamily: '"Space Grotesk", system-ui, sans-serif',
-                        letterSpacing: "-0.025em",
-                    }}
-                >
-                    QTE 挑戰
-                </motion.h2>
-                <div style={{ color: "#D4D4D8", fontSize: 14 }}>
+                {!isMobile && (
+                    <motion.h2
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        style={{
+                            color: "#FAFAFA",
+                            fontSize: "clamp(18px, 5vw, 28px)",
+                            fontWeight: 700,
+                            fontFamily: '"Space Grotesk", system-ui, sans-serif',
+                            letterSpacing: "-0.025em",
+                            margin: 0,
+                        }}
+                    >
+                        QTE 挑戰
+                    </motion.h2>
+                )}
+                <div style={{ color: "#D4D4D8", fontSize: "clamp(12px, 3vw, 14px)" }}>
                     分數：<span style={{ color: "#F59E0B", fontWeight: 700 }}>{score}</span> / 20
                 </div>
             </div>
@@ -415,15 +442,18 @@ export function QTEGame({ onComplete }: QTEGameProps) {
                 ref={videoRef}
                 src="/超負荷挺Toyz.mp4"
                 autoPlay
+                playsInline
                 onLoadedMetadata={() => {
                     if (videoRef.current) videoRef.current.volume = 0.25;
                 }}
                 style={{
-                    maxWidth: "85%",
-                    maxHeight: "75%",
-                    borderRadius: 12,
+                    width: isMobile ? "95%" : "auto",
+                    maxWidth: isMobile ? "95%" : "85%",
+                    maxHeight: isMobile ? "45vh" : "65vh",
+                    borderRadius: "clamp(8px, 2vw, 12px)",
                     border: "1px solid rgba(255, 255, 255, 0.08)",
                     boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+                    marginTop: isMobile ? "clamp(60px, 15vh, 80px)" : 80,
                 }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -469,8 +499,8 @@ export function QTEGame({ onComplete }: QTEGameProps) {
                             }
                             transition={{ duration: 0.6, repeat: Infinity }}
                             style={{
-                                width: 90,
-                                height: 90,
+                                width: qteButtonSize,
+                                height: qteButtonSize,
                                 background:
                                     qte.result === "success"
                                         ? "#22C55E"
@@ -478,11 +508,11 @@ export function QTEGame({ onComplete }: QTEGameProps) {
                                         ? "#1A1A24"
                                         : "#F59E0B",
                                 border: qte.result === "fail" ? "1px solid rgba(255,255,255,0.1)" : "none",
-                                borderRadius: 12,
+                                borderRadius: isMobile ? 10 : 12,
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                fontSize: 42,
+                                fontSize: isMobile ? 32 : 42,
                                 fontWeight: 700,
                                 fontFamily: '"Space Grotesk", system-ui, sans-serif',
                                 color: qte.result === "fail" ? "#71717A" : "#0A0A0F",
@@ -504,23 +534,24 @@ export function QTEGame({ onComplete }: QTEGameProps) {
                             <>
                                 <div
                                     style={{
-                                        marginTop: 10,
+                                        marginTop: isMobile ? 6 : 10,
                                         color: "#FAFAFA",
-                                        fontSize: 14,
+                                        fontSize: isMobile ? 11 : 14,
                                         fontWeight: 500,
                                         textShadow: "0 2px 10px rgba(0,0,0,0.8)",
                                         userSelect: "none",
+                                        whiteSpace: "nowrap",
                                     }}
                                 >
-                                    按 / 點擊 <span style={{ color: "#F59E0B", fontWeight: 700 }}>{qte.key}</span>
+                                    {isMobile ? "點擊" : "按 / 點擊"} <span style={{ color: "#F59E0B", fontWeight: 700 }}>{qte.key}</span>
                                 </div>
 
                                 {/* 倒數條 */}
                                 <div
                                     style={{
-                                        marginTop: 8,
-                                        width: 90,
-                                        height: 4,
+                                        marginTop: isMobile ? 4 : 8,
+                                        width: qteButtonSize,
+                                        height: isMobile ? 3 : 4,
                                         background: "rgba(255,255,255,0.1)",
                                         borderRadius: 2,
                                         overflow: "hidden",

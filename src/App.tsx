@@ -66,8 +66,8 @@ function App() {
                             title="第一關：記憶配對"
                             lines={[
                                 "點擊卡片找出相同圖案，各配對一組。",
-                                `你有 ${memoryMaxFails} 次失敗機會，超過就會失敗！`,
-                                "配錯會出現惡作劇影片，別被干擾！",
+                                `你有 ${memoryMaxFails} 次失敗機會，失敗就會被館長罵`,
+                                "配錯會出現隨機影片，別被干擾！",
                             ]}
                             onStart={() => setShowMemoryDialog(false)}
                         />
@@ -107,7 +107,7 @@ function App() {
                             lines={[
                                 "把畫面中亂跑的影片拉到邊界外！",
                                 "每拉出一個影片 +1 分。",
-                                "BONUS 按鈕可以一次清除所有影片 +10 分！",
+                                "右邊按鈕可以一次清除所有影片 +10 分！",
                                 "累積 35 分即可過關。",
                             ]}
                             onStart={() => setShowDragDialog(false)}

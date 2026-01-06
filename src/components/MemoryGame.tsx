@@ -13,6 +13,44 @@ const ASSETS = [
     { id: "6", image: "/assets/images/溝通溝通.png", sound: "/assets/sounds/溝通溝通.mp3" },
 ];
 
+// 計算響應式卡片大小
+function useCardSize() {
+    const [size, setSize] = useState({ cardSize: 140, gap: 12, columns: 4 });
+
+    useEffect(() => {
+        const updateSize = () => {
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+
+            // 手機直式
+            if (vw < 500) {
+                const cardSize = Math.min(Math.floor((vw - 60) / 3), 100);
+                setSize({ cardSize, gap: 8, columns: 3 });
+            }
+            // 手機橫式或小平板
+            else if (vw < 768) {
+                const cardSize = Math.min(Math.floor((vw - 80) / 4), 110);
+                setSize({ cardSize, gap: 10, columns: 4 });
+            }
+            // 平板或小螢幕
+            else if (vw < 1024) {
+                const cardSize = Math.min(Math.floor((Math.min(vw, vh) - 100) / 4), 130);
+                setSize({ cardSize, gap: 12, columns: 4 });
+            }
+            // 桌面
+            else {
+                setSize({ cardSize: 140, gap: 12, columns: 4 });
+            }
+        };
+
+        updateSize();
+        window.addEventListener("resize", updateSize);
+        return () => window.removeEventListener("resize", updateSize);
+    }, []);
+
+    return size;
+}
+
 interface MemoryGameProps {
     onComplete: () => void;
     onFail: () => void;
@@ -33,6 +71,8 @@ export function MemoryGame({ onComplete, onFail, maxFails = 3 }: MemoryGameProps
     const [failVideoKey, setFailVideoKey] = useState(0); // 用來強制重新渲染影片
     const failVideoRef = useRef<HTMLVideoElement>(null);
     const { play } = useAudio();
+    const { cardSize, gap, columns } = useCardSize();
+    const isMobile = window.innerWidth < 500;
 
     // 初始化卡片
     useEffect(() => {
@@ -156,9 +196,11 @@ export function MemoryGame({ onComplete, onFail, maxFails = 3 }: MemoryGameProps
                 alignItems: "center",
                 justifyContent: "center",
                 background: "#0A0A0F",
-                gap: 16,
+                gap: "clamp(8px, 2vh, 16px)",
                 overflow: "hidden",
                 position: "relative",
+                padding: "10px",
+                boxSizing: "border-box",
             }}
         >
             {/* Ambient glow */}
@@ -168,8 +210,8 @@ export function MemoryGame({ onComplete, onFail, maxFails = 3 }: MemoryGameProps
                     top: "-10%",
                     left: "50%",
                     transform: "translateX(-50%)",
-                    width: 600,
-                    height: 400,
+                    width: "min(600px, 100vw)",
+                    height: "min(400px, 60vh)",
                     background: "radial-gradient(ellipse, rgba(245, 158, 11, 0.06) 0%, transparent 70%)",
                     pointerEvents: "none",
                 }}
@@ -182,44 +224,49 @@ export function MemoryGame({ onComplete, onFail, maxFails = 3 }: MemoryGameProps
                 style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 16,
+                    gap: "clamp(6px, 2vw, 16px)",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    padding: "0 10px",
                 }}
             >
                 <div
                     style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 8,
-                        padding: "6px 14px",
+                        gap: 6,
+                        padding: isMobile ? "4px 10px" : "6px 14px",
                         background: "rgba(245, 158, 11, 0.1)",
                         border: "1px solid rgba(245, 158, 11, 0.2)",
                         borderRadius: 9999,
-                        fontSize: 13,
+                        fontSize: "clamp(10px, 2.5vw, 13px)",
                         color: "#F59E0B",
                         fontWeight: 500,
+                        whiteSpace: "nowrap",
                     }}
                 >
-                    第一關：記憶配對
+                    {isMobile ? "第一關" : "第一關：記憶配對"}
                 </div>
 
-                {/* 剩餘機會 - 移到標題旁邊 */}
+                {/* 剩餘機會 */}
                 <div
                     style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 8,
-                        padding: "6px 14px",
+                        gap: 6,
+                        padding: isMobile ? "4px 10px" : "6px 14px",
                         background: failCount >= maxFails - 1 ? "rgba(239, 68, 68, 0.15)" : "rgba(26, 26, 36, 0.6)",
                         border:
                             failCount >= maxFails - 1
                                 ? "1px solid rgba(239, 68, 68, 0.3)"
                                 : "1px solid rgba(255, 255, 255, 0.08)",
                         borderRadius: 9999,
-                        fontSize: 13,
+                        fontSize: "clamp(10px, 2.5vw, 13px)",
                         transition: "all 300ms ease-out",
+                        whiteSpace: "nowrap",
                     }}
                 >
-                    <span style={{ color: "#71717A" }}>剩餘機會</span>
+                    <span style={{ color: "#71717A" }}>{isMobile ? "機會" : "剩餘機會"}</span>
                     <span
                         style={{
                             color: failCount >= maxFails - 1 ? "#EF4444" : "#22C55E",
@@ -235,12 +282,13 @@ export function MemoryGame({ onComplete, onFail, maxFails = 3 }: MemoryGameProps
                     style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 8,
-                        padding: "6px 14px",
+                        gap: 6,
+                        padding: isMobile ? "4px 10px" : "6px 14px",
                         background: "rgba(26, 26, 36, 0.6)",
                         border: "1px solid rgba(255, 255, 255, 0.08)",
                         borderRadius: 9999,
-                        fontSize: 13,
+                        fontSize: "clamp(10px, 2.5vw, 13px)",
+                        whiteSpace: "nowrap",
                     }}
                 >
                     <span style={{ color: "#71717A" }}>配對</span>
@@ -253,8 +301,8 @@ export function MemoryGame({ onComplete, onFail, maxFails = 3 }: MemoryGameProps
             <div
                 style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(4, 1fr)",
-                    gap: 12,
+                    gridTemplateColumns: `repeat(${columns}, 1fr)`,
+                    gap: gap,
                     padding: 10,
                 }}
             >
@@ -272,8 +320,8 @@ export function MemoryGame({ onComplete, onFail, maxFails = 3 }: MemoryGameProps
                             whileTap={!card.isFlipped && !card.isMatched ? { scale: 0.95 } : {}}
                             onClick={() => handleCardClick(card)}
                             style={{
-                                width: 140,
-                                height: 140,
+                                width: cardSize,
+                                height: cardSize,
                                 cursor: card.isFlipped || card.isMatched ? "default" : "pointer",
                                 perspective: 1000,
                                 transformStyle: "preserve-3d",
@@ -289,11 +337,11 @@ export function MemoryGame({ onComplete, onFail, maxFails = 3 }: MemoryGameProps
                                     background: "rgba(26, 26, 36, 0.8)",
                                     backdropFilter: "blur(8px)",
                                     border: "1px solid rgba(255, 255, 255, 0.08)",
-                                    borderRadius: 12,
+                                    borderRadius: "clamp(8px, 2vw, 12px)",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
-                                    fontSize: 42,
+                                    fontSize: "clamp(24px, 6vw, 42px)",
                                     color: "#F59E0B",
                                     boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
                                 }}
@@ -311,7 +359,7 @@ export function MemoryGame({ onComplete, onFail, maxFails = 3 }: MemoryGameProps
                                     transform: "rotateY(180deg)",
                                     background: "#1A1A24",
                                     border: "1px solid rgba(245, 158, 11, 0.2)",
-                                    borderRadius: 12,
+                                    borderRadius: "clamp(8px, 2vw, 12px)",
                                     overflow: "hidden",
                                     boxShadow: "0 10px 30px rgba(0,0,0,0.3), 0 0 20px rgba(245, 158, 11, 0.1)",
                                 }}
@@ -361,7 +409,7 @@ export function MemoryGame({ onComplete, onFail, maxFails = 3 }: MemoryGameProps
                                 (e.target as HTMLVideoElement).volume = 0.3;
                             }}
                             style={{
-                                width: 280,
+                                width: "clamp(180px, 40vw, 280px)",
                                 height: "auto",
                             }}
                             playsInline

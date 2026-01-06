@@ -17,6 +17,8 @@ export function Dialog({ title, lines = [], onStart }: DialogProps) {
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 2000,
+        padding: 16,
+        boxSizing: 'border-box',
       }}
     >
       <motion.div
@@ -25,20 +27,20 @@ export function Dialog({ title, lines = [], onStart }: DialogProps) {
         transition={{ type: 'spring', stiffness: 300, damping: 26 }}
         style={{
           width: 520,
-          maxWidth: '90vw',
+          maxWidth: '100%',
           background: '#12121A',
           border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: 14,
           boxShadow: '0 30px 80px rgba(0,0,0,0.6)',
-          padding: 24,
+          padding: 'clamp(16px, 4vw, 24px)',
           color: '#FAFAFA',
           fontFamily: '"Space Grotesk", system-ui, sans-serif',
         }}
       >
-        <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 12, letterSpacing: '-0.01em' }}>{title}</div>
+        <div style={{ fontSize: 'clamp(16px, 4vw, 20px)', fontWeight: 700, marginBottom: 12, letterSpacing: '-0.01em' }}>{title}</div>
         <div style={{ display: 'grid', gap: 8, color: '#D4D4D8' }}>
           {lines.map((t, i) => (
-            <div key={i} style={{ fontSize: 15, lineHeight: 1.5 }}>{t}</div>
+            <div key={i} style={{ fontSize: 'clamp(13px, 3.5vw, 15px)', lineHeight: 1.5 }}>{t}</div>
           ))}
         </div>
         <div style={{ height: 16 }} />
@@ -46,12 +48,13 @@ export function Dialog({ title, lines = [], onStart }: DialogProps) {
           onClick={onStart}
           style={{
             width: '100%',
-            padding: '10px 14px',
+            padding: 'clamp(12px, 2.5vw, 14px) 14px',
             background: '#F59E0B',
             color: '#0A0A0F',
             border: 'none',
             borderRadius: 10,
             fontWeight: 700,
+            fontSize: 'clamp(14px, 3.5vw, 16px)',
             cursor: 'pointer',
           }}
         >

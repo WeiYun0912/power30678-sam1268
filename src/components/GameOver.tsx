@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 interface GameOverProps {
     onRestart: () => void;
@@ -8,11 +8,18 @@ interface GameOverProps {
 
 export function GameOver({ onRestart, nextChances }: GameOverProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 600);
 
     useEffect(() => {
         if (videoRef.current) {
             videoRef.current.play().catch(() => {});
         }
+    }, []);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 600);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
     }, []);
 
     return (
@@ -67,7 +74,8 @@ export function GameOver({ onRestart, nextChances }: GameOverProps) {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: 24,
+                    gap: isMobile ? 16 : 24,
+                    padding: "0 15px",
                 }}
             >
                 <motion.div
@@ -76,20 +84,20 @@ export function GameOver({ onRestart, nextChances }: GameOverProps) {
                     style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 8,
-                        padding: "8px 20px",
+                        gap: isMobile ? 6 : 8,
+                        padding: isMobile ? "6px 16px" : "8px 20px",
                         background: "rgba(239, 68, 68, 0.15)",
                         border: "1px solid rgba(239, 68, 68, 0.3)",
                         borderRadius: 9999,
-                        fontSize: 14,
+                        fontSize: isMobile ? 12 : 14,
                         color: "#EF4444",
                         fontWeight: 500,
                     }}
                 >
                     <span
                         style={{
-                            width: 8,
-                            height: 8,
+                            width: isMobile ? 6 : 8,
+                            height: isMobile ? 6 : 8,
                             borderRadius: "50%",
                             background: "#EF4444",
                             boxShadow: "0 0 10px rgba(239, 68, 68, 0.5)",
@@ -104,11 +112,12 @@ export function GameOver({ onRestart, nextChances }: GameOverProps) {
                     transition={{ delay: 0.2 }}
                     style={{
                         color: "#FAFAFA",
-                        fontSize: 56,
+                        fontSize: isMobile ? "clamp(32px, 10vw, 48px)" : 56,
                         fontWeight: 700,
                         fontFamily: '"Space Grotesk", system-ui, sans-serif',
                         letterSpacing: "-0.025em",
                         textShadow: "0 0 40px rgba(0,0,0,0.8)",
+                        textAlign: "center",
                     }}
                 >
                     太 LOW 了！
@@ -121,7 +130,7 @@ export function GameOver({ onRestart, nextChances }: GameOverProps) {
                         transition={{ delay: 0.3 }}
                         style={{
                             color: "#D4D4D8",
-                            fontSize: 18,
+                            fontSize: isMobile ? 14 : 18,
                             textAlign: "center",
                             textShadow: "0 2px 10px rgba(0,0,0,0.8)",
                         }}
@@ -141,14 +150,14 @@ export function GameOver({ onRestart, nextChances }: GameOverProps) {
                     whileTap={{ scale: 0.98 }}
                     onClick={onRestart}
                     style={{
-                        marginTop: 20,
-                        padding: "16px 48px",
-                        fontSize: 18,
+                        marginTop: isMobile ? 10 : 20,
+                        padding: isMobile ? "12px 36px" : "16px 48px",
+                        fontSize: isMobile ? 15 : 18,
                         fontWeight: 600,
                         color: "#0A0A0F",
                         background: "#F59E0B",
                         border: "none",
-                        borderRadius: 12,
+                        borderRadius: isMobile ? 8 : 12,
                         cursor: "pointer",
                         boxShadow: "0 0 20px rgba(245, 158, 11, 0.2)",
                         transition: "all 200ms ease-out",
@@ -168,9 +177,9 @@ export function GameOver({ onRestart, nextChances }: GameOverProps) {
                 transition={{ delay: 1 }}
                 style={{
                     position: "absolute",
-                    bottom: 20,
+                    bottom: isMobile ? 10 : 20,
                     color: "yellow",
-                    fontSize: 12,
+                    fontSize: isMobile ? 10 : 12,
                     textDecoration: "none",
                     transition: "color 200ms ease-out",
                 }}
