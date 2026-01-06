@@ -195,13 +195,17 @@ export function Menu({ onStart }: MenuProps) {
             <div
                 style={{
                     position: "absolute",
-                    bottom: 20,
+                    bottom: "clamp(10px, 2vh, 20px)",
+                    left: "50%",
+                    transform: "translateX(-50%)",
                     display: "flex",
                     flexDirection: "row",
                     alignItems: "center",
                     gap: 12,
                     flexWrap: "wrap",
                     justifyContent: "center",
+                    zIndex: 100,
+                    padding: "0 10px",
                 }}
             >
                 <motion.a

@@ -18,16 +18,17 @@ export function Complete({ onRestart }: CompleteProps) {
         <div
             style={{
                 width: "100vw",
-                height: "100vh",
+                minHeight: "100vh",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 background: "#0A0A0F",
-                gap: isMobile ? 16 : 24,
+                gap: isMobile ? 12 : 24,
                 position: "relative",
-                overflow: "hidden",
-                padding: isMobile ? 15 : 20,
+                overflow: "auto",
+                padding: isMobile ? "60px 15px" : "80px 20px",
+                boxSizing: "border-box",
             }}
         >
             {/* Ambient celebration glow */}
@@ -213,12 +214,19 @@ export function Complete({ onRestart }: CompleteProps) {
             {/* Footer */}
             <div
                 style={{
-                    position: "absolute",
-                    bottom: isMobile ? 10 : 20,
+                    position: "fixed",
+                    bottom: isMobile ? 8 : 15,
+                    left: "50%",
+                    transform: "translateX(-50%)",
                     display: "flex",
                     flexDirection: isMobile ? "column" : "row",
                     alignItems: "center",
                     gap: isMobile ? 4 : 12,
+                    zIndex: 1000,
+                    background: isMobile ? "rgba(10, 10, 15, 0.8)" : "transparent",
+                    padding: isMobile ? "6px 12px" : "0",
+                    borderRadius: isMobile ? 8 : 0,
+                    backdropFilter: isMobile ? "blur(8px)" : "none",
                 }}
             >
                 <motion.a

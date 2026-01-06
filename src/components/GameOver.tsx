@@ -168,25 +168,70 @@ export function GameOver({ onRestart, nextChances }: GameOverProps) {
             </div>
 
             {/* Footer */}
-            <motion.a
-                href="https://www.instagram.com/naked_logic"
-                target="_blank"
-                rel="noopener noreferrer"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1 }}
+            <div
                 style={{
                     position: "absolute",
                     bottom: isMobile ? 10 : 20,
-                    color: "yellow",
-                    fontSize: isMobile ? 10 : 12,
-                    textDecoration: "none",
-                    transition: "color 200ms ease-out",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    display: "flex",
+                    flexDirection: isMobile ? "column" : "row",
+                    alignItems: "center",
+                    gap: isMobile ? 4 : 12,
+                    zIndex: 100,
+                    background: isMobile ? "rgba(10, 10, 15, 0.8)" : "transparent",
+                    padding: isMobile ? "6px 12px" : "0",
+                    borderRadius: isMobile ? 8 : 0,
+                    backdropFilter: isMobile ? "blur(8px)" : "none",
                 }}
-                whileHover={{ color: "#F59E0B" }}
             >
-                made by @naked_logic
-            </motion.a>
+                <motion.a
+                    href="https://www.instagram.com/naked_logic"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1 }}
+                    style={{
+                        color: "yellow",
+                        fontSize: isMobile ? 10 : 12,
+                        textDecoration: "none",
+                        transition: "color 200ms ease-out",
+                    }}
+                    whileHover={{ color: "#F59E0B" }}
+                >
+                    made by @naked_logic
+                </motion.a>
+                <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1 }}
+                    style={{
+                        color: "#71717A",
+                        fontSize: isMobile ? 10 : 12,
+                        display: isMobile ? "none" : "inline",
+                    }}
+                >
+                    ·
+                </motion.span>
+                <motion.a
+                    href="https://github.com/WeiYun0912/power30678-sam1268"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1.1 }}
+                    style={{
+                        color: "#71717A",
+                        fontSize: isMobile ? 10 : 12,
+                        textDecoration: "none",
+                        transition: "color 200ms ease-out",
+                    }}
+                    whileHover={{ color: "#FAFAFA" }}
+                >
+                    GitHub 原始碼
+                </motion.a>
+            </div>
         </div>
     );
 }
