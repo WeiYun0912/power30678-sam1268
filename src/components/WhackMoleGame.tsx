@@ -10,7 +10,7 @@ const TARGET_VIDEOS = [`${BASE}哭蕊宿頭.mp4`, `${BASE}溝通溝通.mp4`];
 const DECOY_VIDEOS = [`${BASE}獲得華.mp4`, `${BASE}MC.mp4`, `${BASE}獲得華.mp4`, `${BASE}太LOW了.mp4`];
 
 // 所有可能出現的影片
-const ALL_VIDEOS = [...TARGET_VIDEOS, ...DECOY_VIDEOS];
+// const ALL_VIDEOS = [...TARGET_VIDEOS, ...DECOY_VIDEOS];
 
 const TARGET_SCORE = 20;
 
