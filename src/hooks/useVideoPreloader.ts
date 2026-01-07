@@ -2,6 +2,16 @@ import { useState, useEffect, useCallback } from 'react'
 
 const BASE = import.meta.env.BASE_URL
 
+// 第一關需要的圖片
+const ALL_IMAGES = [
+  `${BASE}assets/images/22222.png`,
+  `${BASE}assets/images/獲得華.png`,
+  `${BASE}assets/images/MC.png`,
+  `${BASE}assets/images/RRRRRR.png`,
+  `${BASE}assets/images/超負荷挺toyz.png`,
+  `${BASE}assets/images/溝通溝通.png`,
+]
+
 // 所有需要預載的影片
 const ALL_VIDEOS = [
   // 第二關
@@ -16,6 +26,8 @@ const ALL_VIDEOS = [
   `${BASE}MC.mp4`,
 ]
 
+const TOTAL_ASSETS = ALL_IMAGES.length + ALL_VIDEOS.length
+
 interface PreloadState {
   isLoading: boolean
   progress: number // 0-100
@@ -29,9 +41,21 @@ export function useVideoPreloader() {
     isLoading: true,
     progress: 0,
     loadedCount: 0,
-    totalCount: ALL_VIDEOS.length,
+    totalCount: TOTAL_ASSETS,
     error: null,
   })
+
+  const preloadImage = useCallback((src: string): Promise<void> => {
+    return new Promise((resolve) => {
+      const img = new Image()
+      img.onload = () => resolve()
+      img.onerror = () => {
+        console.warn(`Failed to preload image: ${src}`)
+        resolve()
+      }
+      img.src = src
+    })
+  }, [])
 
   const preloadVideo = useCallback((src: string): Promise<void> => {
     return new Promise((resolve) => {
@@ -79,7 +103,20 @@ export function useVideoPreloader() {
 
     let loadedCount = 0
 
-    // 並行載入所有影片，但限制同時載入數量
+    // 先載入第一關的圖片（優先）
+    await Promise.all(
+      ALL_IMAGES.map(async (src) => {
+        await preloadImage(src)
+        loadedCount++
+        setState(prev => ({
+          ...prev,
+          loadedCount,
+          progress: Math.round((loadedCount / TOTAL_ASSETS) * 100),
+        }))
+      })
+    )
+
+    // 再載入影片，限制同時載入數量
     const batchSize = 3
     for (let i = 0; i < ALL_VIDEOS.length; i += batchSize) {
       const batch = ALL_VIDEOS.slice(i, i + batchSize)
@@ -90,14 +127,14 @@ export function useVideoPreloader() {
           setState(prev => ({
             ...prev,
             loadedCount,
-            progress: Math.round((loadedCount / ALL_VIDEOS.length) * 100),
+            progress: Math.round((loadedCount / TOTAL_ASSETS) * 100),
           }))
         })
       )
     }
 
     setState(prev => ({ ...prev, isLoading: false, progress: 100 }))
-  }, [preloadVideo])
+  }, [preloadImage, preloadVideo])
 
   useEffect(() => {
     preloadAll()
