@@ -32,6 +32,7 @@ interface WhackMoleGameProps {
 }
 
 export function WhackMoleGame({ onComplete }: WhackMoleGameProps) {
+    const { volume } = useVolume();
     const [score, setScore] = useState(0);
     const [moles, setMoles] = useState<Mole[]>([]);
     const [hitEffects, setHitEffects] = useState<{ id: number; x: number; y: number; isCorrect: boolean }[]>([]);
@@ -299,7 +300,7 @@ export function WhackMoleGame({ onComplete }: WhackMoleGameProps) {
                                                 loop
                                                 playsInline
                                                 onLoadedMetadata={(e) => {
-                                                    (e.target as HTMLVideoElement).volume = 0.3;
+                                                    (e.target as HTMLVideoElement).volume = volume;
                                                 }}
                                                 style={{
                                                     width: "100%",

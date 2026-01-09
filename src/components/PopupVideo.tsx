@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
+import { useVolume } from "../contexts/VolumeContext";
 
 interface PopupVideoProps {
     src: string;
@@ -24,6 +25,7 @@ export function PopupVideo({
     const [isMobile] = useState(window.innerWidth < 600);
     const onCloseRef = useRef(onClose);
     const hasCalledRef = useRef(false); // 移到組件層級
+    const { volume } = useVolume();
 
     // 更新 onClose ref
     useEffect(() => {
@@ -36,10 +38,10 @@ export function PopupVideo({
 
     useEffect(() => {
         if (videoRef.current) {
-            videoRef.current.volume = 0.3;
+            videoRef.current.volume = volume;
             videoRef.current.play().catch(() => {});
         }
-    }, []);
+    }, [volume]);
 
     // 影片播完自動關閉
     useEffect(() => {

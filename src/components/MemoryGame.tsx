@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "../types/game";
 import { useAudio } from "../hooks/useAudio";
+import { useVolume } from "../contexts/VolumeContext";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -74,6 +75,7 @@ export function MemoryGame({ onComplete, onFail, maxFails = 3 }: MemoryGameProps
     const failVideoRef = useRef<HTMLVideoElement>(null);
     const { play } = useAudio();
     const { cardSize, gap, columns } = useCardSize();
+    const { volume } = useVolume();
     const isMobile = window.innerWidth < 500;
 
     // 初始化卡片
@@ -408,7 +410,7 @@ export function MemoryGame({ onComplete, onFail, maxFails = 3 }: MemoryGameProps
                             autoPlay
                             muted={false}
                             onLoadedMetadata={(e) => {
-                                (e.target as HTMLVideoElement).volume = 0.3;
+                                (e.target as HTMLVideoElement).volume = volume;
                             }}
                             style={{
                                 width: "clamp(180px, 40vw, 280px)",

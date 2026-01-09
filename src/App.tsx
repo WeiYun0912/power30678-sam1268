@@ -12,6 +12,8 @@ import { GameStage } from "./types/game";
 import { Dialog } from "./components/Dialog";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { useVideoPreloader } from "./hooks/useVideoPreloader";
+import { VolumeProvider } from "./contexts/VolumeContext";
+import { VolumeControl } from "./components/VolumeControl";
 
 function App() {
     const { isLoading, progress, loadedCount, totalCount } = useVideoPreloader();
@@ -115,12 +117,14 @@ function App() {
     }
 
     return (
-        <AnimatePresence mode="wait">
-            {stage === "menu" && (
-                <motion.div key="menu" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    <Menu onStart={handleStart} onSelectLevel={handleSelectLevel} />
-                </motion.div>
-            )}
+        <VolumeProvider>
+            <AnimatePresence mode="wait">
+                {stage === "menu" && (
+                    <motion.div key="menu" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <Menu onStart={handleStart} onSelectLevel={handleSelectLevel} />
+                        <VolumeControl />
+                    </motion.div>
+                )}
 
             {stage === "memory" && (
                 <motion.div key="memory" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -135,11 +139,14 @@ function App() {
                             onStart={() => setShowMemoryDialog(false)}
                         />
                     ) : (
-                        <MemoryGame
-                            onComplete={handleMemoryComplete}
-                            onFail={handleMemoryFail}
-                            maxFails={memoryMaxFails}
-                        />
+                        <>
+                            <MemoryGame
+                                onComplete={handleMemoryComplete}
+                                onFail={handleMemoryFail}
+                                maxFails={memoryMaxFails}
+                            />
+                            <VolumeControl />
+                        </>
                     )}
                 </motion.div>
             )}
@@ -157,7 +164,10 @@ function App() {
                             onStart={() => setShowQteDialog(false)}
                         />
                     ) : (
-                        <QTEGame onComplete={handleQTEComplete} />
+                        <>
+                            <QTEGame onComplete={handleQTEComplete} />
+                            <VolumeControl />
+                        </>
                     )}
                 </motion.div>
             )}
@@ -176,7 +186,10 @@ function App() {
                             onStart={() => setShowDragDialog(false)}
                         />
                     ) : (
-                        <DragGame onComplete={handleDragComplete} />
+                        <>
+                            <DragGame onComplete={handleDragComplete} />
+                            <VolumeControl />
+                        </>
                     )}
                 </motion.div>
             )}
@@ -195,7 +208,10 @@ function App() {
                             onStart={() => setShowWhackDialog(false)}
                         />
                     ) : (
-                        <WhackMoleGame onComplete={handleWhackComplete} />
+                        <>
+                            <WhackMoleGame onComplete={handleWhackComplete} />
+                            <VolumeControl />
+                        </>
                     )}
                 </motion.div>
             )}
@@ -213,7 +229,10 @@ function App() {
                             onStart={() => setShowMinesweeperDialog(false)}
                         />
                     ) : (
-                        <MinesweeperGame onComplete={handleMinesweeperComplete} onFail={handleMinesweeperFail} />
+                        <>
+                            <MinesweeperGame onComplete={handleMinesweeperComplete} onFail={handleMinesweeperFail} />
+                            <VolumeControl />
+                        </>
                     )}
                 </motion.div>
             )}
@@ -221,15 +240,18 @@ function App() {
             {stage === "complete" && (
                 <motion.div key="complete" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                     <Complete onRestart={handleRestart} />
+                    <VolumeControl />
                 </motion.div>
             )}
 
             {stage === "gameover" && (
                 <motion.div key="gameover" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                     <GameOver onRestart={handleRetry} nextChances={memoryMaxFails} />
+                    <VolumeControl />
                 </motion.div>
             )}
-        </AnimatePresence>
+            </AnimatePresence>
+        </VolumeProvider>
     );
 }
 

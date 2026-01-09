@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { QTEEvent } from "../types/game";
 import { PopupVideo } from "./PopupVideo";
+import { useVolume } from "../contexts/VolumeContext";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -135,6 +136,7 @@ export function QTEGame({ onComplete }: QTEGameProps) {
     const [popupVideos, setPopupVideos] = useState<PopupVideoState[]>([]);
     const [score, setScore] = useState(0);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 600);
+    const { volume } = useVolume();
 
     const qteTimersRef = useRef<Map<number, { timeout: number; interval: number }>>(new Map());
     const popupIdRef = useRef(0);
@@ -145,6 +147,13 @@ export function QTEGame({ onComplete }: QTEGameProps) {
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
+
+    // 監聽音量變化，即時更新背景影片音量
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.volume = volume;
+        }
+    }, [volume]);
 
     // 初始化 QTE 事件的隨機字母（確保同時出現的 QTE 字母不重複）
     const [qteEvents] = useState(() => {
@@ -463,7 +472,7 @@ export function QTEGame({ onComplete }: QTEGameProps) {
                 autoPlay
                 playsInline
                 onLoadedMetadata={() => {
-                    if (videoRef.current) videoRef.current.volume = 0.25;
+                    if (videoRef.current) videoRef.current.volume = volume;
                 }}
                 style={{
                     width: isMobile ? "95%" : "auto",

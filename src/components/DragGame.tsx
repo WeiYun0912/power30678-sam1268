@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useVolume } from "../contexts/VolumeContext";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -34,6 +35,7 @@ export function DragGame({ onComplete }: DragGameProps) {
     const [draggingId, setDraggingId] = useState<number | null>(null); // 正在拖拉的影片 ID
     const introVideoRef = useRef<HTMLVideoElement>(null);
     const bonusVideoRef = useRef<HTMLVideoElement>(null);
+    const { volume } = useVolume();
     const animationRef = useRef<number>();
     const videoIdRef = useRef(0);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 600);
@@ -67,7 +69,7 @@ export function DragGame({ onComplete }: DragGameProps) {
     // 播放開場影片
     useEffect(() => {
         if (phase === "intro" && introVideoRef.current) {
-            introVideoRef.current.volume = 0.3;
+            introVideoRef.current.volume = volume;
             introVideoRef.current.play().catch(() => {});
 
             const video = introVideoRef.current;
@@ -78,7 +80,7 @@ export function DragGame({ onComplete }: DragGameProps) {
             video.addEventListener("ended", handleEnded);
             return () => video.removeEventListener("ended", handleEnded);
         }
-    }, [phase]);
+    }, [phase, volume]);
 
     // 生成新影片（確保在邊界內）
     const spawnVideo = useCallback(() => {
@@ -224,7 +226,7 @@ export function DragGame({ onComplete }: DragGameProps) {
         // 播放影片
         setTimeout(() => {
             if (bonusVideoRef.current) {
-                bonusVideoRef.current.volume = 0.35;
+                bonusVideoRef.current.volume = volume;
                 bonusVideoRef.current.play().catch(() => {});
             }
         }, 100);
@@ -250,7 +252,7 @@ export function DragGame({ onComplete }: DragGameProps) {
         setTimeout(() => {
             setShowBonusVideo(false);
         }, 3000);
-    }, [bonusUsed, onComplete]);
+    }, [bonusUsed, onComplete, volume]);
 
     return (
         <div
@@ -568,10 +570,10 @@ function DraggableVideoItem({ video, videoSize, onDragStart, onDragEnd }: Dragga
 
     useEffect(() => {
         if (videoRef.current) {
-            videoRef.current.volume = 0.15; // 小聲播放
+            videoRef.current.volume = volume;
             videoRef.current.play().catch(() => {});
         }
-    }, []);
+    }, [volume]);
 
     const handlePointerDown = (e: React.PointerEvent) => {
         e.preventDefault();
