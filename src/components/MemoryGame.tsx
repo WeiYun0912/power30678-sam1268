@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "../types/game";
 import { useAudio } from "../hooks/useAudio";
 
-const BASE = import.meta.env.BASE_URL
+const BASE = import.meta.env.BASE_URL;
 
 // 動態載入素材
 const ASSETS = [

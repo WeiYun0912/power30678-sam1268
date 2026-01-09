@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { QTEEvent } from "../types/game";
 import { PopupVideo } from "./PopupVideo";
 
-const BASE = import.meta.env.BASE_URL
+const BASE = import.meta.env.BASE_URL;
 
 // QTE 時間點設定 - 更密集，同時出現多個
 const QTE_EVENTS: QTEEvent[] = [
@@ -182,17 +182,49 @@ export function QTEGame({ onComplete }: QTEGameProps) {
     });
 
     // 添加彈出影片
-    const addPopupVideo = useCallback((src: string, options: { showClose: boolean; autoCloseOnEnd: boolean; isDistraction: boolean; loop: boolean }) => {
-        const pos = getRandomPosition();
-        const id = popupIdRef.current++;
-        setPopupVideos((prev) => [...prev, { id, src, ...pos, ...options }]);
-        return id;
-    }, []);
+    const addPopupVideo = useCallback(
+        (
+            src: string,
+            options: { showClose: boolean; autoCloseOnEnd: boolean; isDistraction: boolean; loop: boolean }
+        ) => {
+            const pos = getRandomPosition();
+            const id = popupIdRef.current++;
+            setPopupVideos((prev) => [...prev, { id, src, ...pos, ...options }]);
+            return id;
+        },
+        []
+    );
 
     // 移除彈出影片（手動關閉干擾影片會 +1 分）
-    const removePopupVideo = useCallback((id: number, addScore: boolean = false) => {
-        setPopupVideos((prev) => prev.filter((v) => v.id !== id));
-        if (addScore) {
+    const removePopupVideo = useCallback(
+        (id: number, addScore: boolean = false) => {
+            setPopupVideos((prev) => prev.filter((v) => v.id !== id));
+            if (addScore) {
+                setScore((prev) => {
+                    const next = prev + 1;
+                    if (next >= 20) {
+                        onComplete();
+                    }
+                    return next;
+                });
+            }
+        },
+        [onComplete]
+    );
+
+    // 處理 QTE 成功
+    const handleQTESuccess = useCallback(
+        (index: number) => {
+            const timers = qteTimersRef.current.get(index);
+            if (timers) {
+                clearTimeout(timers.timeout);
+                clearInterval(timers.interval);
+                qteTimersRef.current.delete(index);
+            }
+
+            setActiveQTEs((prev) => prev.map((qte) => (qte.index === index ? { ...qte, result: "success" } : qte)));
+            setCompletedQTEs((prev) => [...prev, index]);
+            // 累積分數，達到 30 分立即過關
             setScore((prev) => {
                 const next = prev + 1;
                 if (next >= 20) {
@@ -200,34 +232,14 @@ export function QTEGame({ onComplete }: QTEGameProps) {
                 }
                 return next;
             });
-        }
-    }, [onComplete]);
 
-    // 處理 QTE 成功
-    const handleQTESuccess = useCallback((index: number) => {
-        const timers = qteTimersRef.current.get(index);
-        if (timers) {
-            clearTimeout(timers.timeout);
-            clearInterval(timers.interval);
-            qteTimersRef.current.delete(index);
-        }
-
-        setActiveQTEs((prev) => prev.map((qte) => (qte.index === index ? { ...qte, result: "success" } : qte)));
-        setCompletedQTEs((prev) => [...prev, index]);
-        // 累積分數，達到 30 分立即過關
-        setScore((prev) => {
-            const next = prev + 1;
-            if (next >= 20) {
-                onComplete();
-            }
-            return next;
-        });
-
-        // 移除這個 QTE
-        setTimeout(() => {
-            setActiveQTEs((prev) => prev.filter((qte) => qte.index !== index));
-        }, 300);
-    }, []);
+            // 移除這個 QTE
+            setTimeout(() => {
+                setActiveQTEs((prev) => prev.filter((qte) => qte.index !== index));
+            }, 300);
+        },
+        [onComplete]
+    );
 
     // 處理 QTE 失敗
     const handleQTEFail = useCallback(
@@ -315,7 +327,12 @@ export function QTEGame({ onComplete }: QTEGameProps) {
                     setTriggeredDistractions((prev) => [...prev, index]);
                     // 隨機選擇干擾影片（可關閉，關閉+1分，循環播放直到關閉）
                     const randomVideo = DISTRACTION_VIDEOS[Math.floor(Math.random() * DISTRACTION_VIDEOS.length)];
-                    addPopupVideo(randomVideo, { showClose: true, autoCloseOnEnd: false, isDistraction: true, loop: true });
+                    addPopupVideo(randomVideo, {
+                        showClose: true,
+                        autoCloseOnEnd: false,
+                        isDistraction: true,
+                        loop: true,
+                    });
                 }
             });
         };
@@ -507,8 +524,8 @@ export function QTEGame({ onComplete }: QTEGameProps) {
                                     qte.result === "success"
                                         ? "#22C55E"
                                         : qte.result === "fail"
-                                        ? "#1A1A24"
-                                        : "#F59E0B",
+                                          ? "#1A1A24"
+                                          : "#F59E0B",
                                 border: qte.result === "fail" ? "1px solid rgba(255,255,255,0.1)" : "none",
                                 borderRadius: isMobile ? 10 : 12,
                                 display: "flex",
@@ -522,8 +539,8 @@ export function QTEGame({ onComplete }: QTEGameProps) {
                                     qte.result === null
                                         ? "0 0 30px rgba(245, 158, 11, 0.3)"
                                         : qte.result === "success"
-                                        ? "0 0 30px rgba(34, 197, 94, 0.3)"
-                                        : "none",
+                                          ? "0 0 30px rgba(34, 197, 94, 0.3)"
+                                          : "none",
                                 cursor: qte.result === null ? "pointer" : "default",
                                 userSelect: "none",
                                 WebkitTapHighlightColor: "transparent",
@@ -545,7 +562,8 @@ export function QTEGame({ onComplete }: QTEGameProps) {
                                         whiteSpace: "nowrap",
                                     }}
                                 >
-                                    {isMobile ? "點擊" : "按 / 點擊"} <span style={{ color: "#F59E0B", fontWeight: 700 }}>{qte.key}</span>
+                                    {isMobile ? "點擊" : "按 / 點擊"}{" "}
+                                    <span style={{ color: "#F59E0B", fontWeight: 700 }}>{qte.key}</span>
                                 </div>
 
                                 {/* 倒數條 */}

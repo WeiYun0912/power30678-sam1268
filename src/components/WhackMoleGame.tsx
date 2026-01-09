@@ -14,6 +14,10 @@ const DECOY_VIDEOS = [`${BASE}獲得華.mp4`, `${BASE}MC.mp4`, `${BASE}獲得華
 
 const TARGET_SCORE = 20;
 
+// 9 個洞的位置（3x3 網格，中間是圖片）
+const HOLES = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+const CENTER_HOLE = 4; // 中間的洞放圖片
+
 interface Mole {
     id: number;
     holeIndex: number;
@@ -36,10 +40,6 @@ export function WhackMoleGame({ onComplete }: WhackMoleGameProps) {
     const effectIdRef = useRef(0);
     const holeRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-    // 9 個洞的位置（3x3 網格，中間是圖片）
-    const holes = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    const centerHole = 4; // 中間的洞放圖片
-
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 600);
         window.addEventListener("resize", handleResize);
@@ -51,7 +51,7 @@ export function WhackMoleGame({ onComplete }: WhackMoleGameProps) {
         setMoles((prev) => {
             // 找出目前沒有地鼠的洞（排除中間）
             const occupiedHoles = prev.map((m) => m.holeIndex);
-            const availableHoles = holes.filter((h) => h !== centerHole && !occupiedHoles.includes(h));
+            const availableHoles = HOLES.filter((h) => h !== CENTER_HOLE && !occupiedHoles.includes(h));
 
             if (availableHoles.length === 0) return prev;
 
@@ -228,9 +228,9 @@ export function WhackMoleGame({ onComplete }: WhackMoleGameProps) {
                     marginTop: isMobile ? 60 : 80,
                 }}
             >
-                {holes.map((holeIndex) => {
+                {HOLES.map((holeIndex) => {
                     const mole = moles.find((m) => m.holeIndex === holeIndex);
-                    const isCenter = holeIndex === centerHole;
+                    const isCenter = holeIndex === CENTER_HOLE;
 
                     return (
                         <div

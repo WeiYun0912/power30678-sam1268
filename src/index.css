@@ -1,92 +1,96 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap");
 
 :root {
-  /* Minimalist Dark - Design Tokens */
-  --background: #0A0A0F;
-  --background-alt: #12121A;
-  --foreground: #FAFAFA;
-  --muted: #1A1A24;
-  --muted-foreground: #71717A;
-  --accent: #F59E0B;
-  --accent-foreground: #0A0A0F;
-  --accent-muted: rgba(245, 158, 11, 0.15);
-  --border: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(255, 255, 255, 0.15);
-  --card: rgba(26, 26, 36, 0.6);
-  --card-solid: #1A1A24;
-  --ring: #F59E0B;
+    /* Minimalist Dark - Design Tokens */
+    --background: #0a0a0f;
+    --background-alt: #12121a;
+    --foreground: #fafafa;
+    --muted: #1a1a24;
+    --muted-foreground: #71717a;
+    --accent: #f59e0b;
+    --accent-foreground: #0a0a0f;
+    --accent-muted: rgba(245, 158, 11, 0.15);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.15);
+    --card: rgba(26, 26, 36, 0.6);
+    --card-solid: #1a1a24;
+    --ring: #f59e0b;
 
-  /* Shadows & Glows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.4);
-  --glow-sm: 0 0 20px rgba(245, 158, 11, 0.15);
-  --glow-md: 0 0 40px rgba(245, 158, 11, 0.2);
-  --glow-lg: 0 0 60px rgba(245, 158, 11, 0.25);
+    /* Shadows & Glows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.4);
+    --glow-sm: 0 0 20px rgba(245, 158, 11, 0.15);
+    --glow-md: 0 0 40px rgba(245, 158, 11, 0.2);
+    --glow-lg: 0 0 60px rgba(245, 158, 11, 0.25);
 }
 
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-html, body, #root {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: var(--background);
-  font-family: 'Inter', system-ui, sans-serif;
-  color: var(--foreground);
-  /* Mobile support */
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
+html,
+body,
+#root {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--background);
+    font-family: "Inter", system-ui, sans-serif;
+    color: var(--foreground);
+    /* Mobile support */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 /* Prevent zoom on double-tap for iOS */
-button, a, [role="button"] {
-  touch-action: manipulation;
+button,
+a,
+[role="button"] {
+    touch-action: manipulation;
 }
 
 /* Ambient background noise texture */
 body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  opacity: 0.015;
-  z-index: 9999;
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.015;
+    z-index: 9999;
 }
 
 /* Selection color */
 ::selection {
-  background: var(--accent);
-  color: var(--accent-foreground);
+    background: var(--accent);
+    color: var(--accent-foreground);
 }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background-alt);
+    background: var(--background-alt);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--muted);
-  border-radius: 4px;
+    background: var(--muted);
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--muted-foreground);
+    background: var(--muted-foreground);
 }

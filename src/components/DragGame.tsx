@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const BASE = import.meta.env.BASE_URL
+const BASE = import.meta.env.BASE_URL;
 
 // 會隨機出現的影片
 const GAME_VIDEOS = [`${BASE}哭蕊宿頭.mp4`, `${BASE}溝通溝通.mp4`, `${BASE}獲得華.mp4`, `${BASE}MC.mp4`];

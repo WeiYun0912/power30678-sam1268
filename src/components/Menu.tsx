@@ -149,7 +149,11 @@ export function Menu({ onStart, onSelectLevel }: MenuProps) {
                     ].map((item, i) => (
                         <motion.div
                             key={i}
-                            whileHover={{ scale: 1.05, borderColor: "rgba(245, 158, 11, 0.4)", boxShadow: "0 0 20px rgba(245, 158, 11, 0.2)" }}
+                            whileHover={{
+                                scale: 1.05,
+                                borderColor: "rgba(245, 158, 11, 0.4)",
+                                boxShadow: "0 0 20px rgba(245, 158, 11, 0.2)",
+                            }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => onSelectLevel?.(item.stage)}
                             style={{

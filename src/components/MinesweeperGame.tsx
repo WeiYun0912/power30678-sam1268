@@ -72,12 +72,12 @@ export function MinesweeperGame({ onComplete, onFail }: MinesweeperGameProps) {
     const explodeVideoRef = useRef<HTMLVideoElement>(null);
     const [popupVideos, setPopupVideos] = useState<PopupVideoState[]>([]);
     const [missedDistractions, setMissedDistractions] = useState(0); // 未關閉的干擾影片次數
-    
+
     // 計算已標記的旗子數量
     const flaggedCount = cells.reduce((count, row) => {
         return count + row.filter((cell) => cell.isFlagged).length;
     }, 0);
-    
+
     // 計算剩餘炸彈數
     const remainingMines = MINE_COUNT - flaggedCount;
     const popupIdRef = useRef(0);
@@ -210,44 +210,47 @@ export function MinesweeperGame({ onComplete, onFail }: MinesweeperGameProps) {
     }, [gameOver, gameWon, onFail]);
 
     // 移除彈出影片
-    const removePopupVideo = useCallback((id: number, isAutoClose?: boolean) => {
-        // 使用 ref 檢查是否已經處理過，避免重複計算
-        if (processedVideoIdsRef.current.has(id)) {
-            // 已經處理過，直接返回，不做任何事
-            return;
-        }
-        
-        // 先標記為已處理，避免在執行期間被重複調用
-        processedVideoIdsRef.current.add(id);
-        
-        // 使用函數式更新來獲取最新狀態
-        setPopupVideos((prev: PopupVideoState[]) => {
-            const video = prev.find((v: PopupVideoState) => v.id === id);
-            if (!video) return prev; // 影片已經被移除，直接返回
-            
-            // 只有干擾影片且自動播完才扣分，且還沒計算過失敗
-            if (video.isDistraction && isAutoClose === true && !failureCountedRef.current.has(id)) {
-                // 標記為已計算失敗
-                failureCountedRef.current.add(id);
-                
-                // 在 setPopupVideos 外部計算失敗，使用 setTimeout 確保只執行一次
-                setTimeout(() => {
-                    setMissedDistractions((prevMissed: number) => {
-                        const newMissed = prevMissed + 1;
-                        if (newMissed >= 3) {
-                            setGameOver(true);
-                            gameStateRef.current.gameOver = true;
-                            setTimeout(() => onFail(), 1000);
-                        }
-                        return newMissed;
-                    });
-                }, 0);
+    const removePopupVideo = useCallback(
+        (id: number, isAutoClose?: boolean) => {
+            // 使用 ref 檢查是否已經處理過，避免重複計算
+            if (processedVideoIdsRef.current.has(id)) {
+                // 已經處理過，直接返回，不做任何事
+                return;
             }
-            
-            // 移除影片
-            return prev.filter((v: PopupVideoState) => v.id !== id);
-        });
-    }, [onFail]);
+
+            // 先標記為已處理，避免在執行期間被重複調用
+            processedVideoIdsRef.current.add(id);
+
+            // 使用函數式更新來獲取最新狀態
+            setPopupVideos((prev: PopupVideoState[]) => {
+                const video = prev.find((v: PopupVideoState) => v.id === id);
+                if (!video) return prev; // 影片已經被移除，直接返回
+
+                // 只有干擾影片且自動播完才扣分，且還沒計算過失敗
+                if (video.isDistraction && isAutoClose === true && !failureCountedRef.current.has(id)) {
+                    // 標記為已計算失敗
+                    failureCountedRef.current.add(id);
+
+                    // 在 setPopupVideos 外部計算失敗，使用 setTimeout 確保只執行一次
+                    setTimeout(() => {
+                        setMissedDistractions((prevMissed: number) => {
+                            const newMissed = prevMissed + 1;
+                            if (newMissed >= 3) {
+                                setGameOver(true);
+                                gameStateRef.current.gameOver = true;
+                                setTimeout(() => onFail(), 1000);
+                            }
+                            return newMissed;
+                        });
+                    }, 0);
+                }
+
+                // 移除影片
+                return prev.filter((v: PopupVideoState) => v.id !== id);
+            });
+        },
+        [onFail]
+    );
 
     // 揭開格子
     const revealCell = useCallback(
@@ -553,7 +556,11 @@ export function MinesweeperGame({ onComplete, onFail }: MinesweeperGameProps) {
                 )}
                 <div style={{ display: "flex", gap: isMobile ? 8 : 12, flexWrap: "wrap", justifyContent: "center" }}>
                     <div style={{ color: "#D4D4D8", fontSize: "clamp(12px, 3vw, 14px)" }}>
-                        未關閉：<span style={{ color: missedDistractions >= 2 ? "#EF4444" : "#F59E0B", fontWeight: 700 }}>{missedDistractions}</span> / 3
+                        未關閉：
+                        <span style={{ color: missedDistractions >= 2 ? "#EF4444" : "#F59E0B", fontWeight: 700 }}>
+                            {missedDistractions}
+                        </span>{" "}
+                        / 3
                     </div>
                     <div style={{ color: "#D4D4D8", fontSize: "clamp(12px, 3vw, 14px)" }}>
                         剩餘炸彈：<span style={{ color: "#F59E0B", fontWeight: 700 }}>{remainingMines}</span>
@@ -622,7 +629,12 @@ export function MinesweeperGame({ onComplete, onFail }: MinesweeperGameProps) {
                             {cell.isRevealed && !cell.isMine && cell.adjacentMines > 0 && (
                                 <span
                                     style={{
-                                        color: cell.adjacentMines === 1 ? "#22C55E" : cell.adjacentMines === 2 ? "#F59E0B" : "#EF4444",
+                                        color:
+                                            cell.adjacentMines === 1
+                                                ? "#22C55E"
+                                                : cell.adjacentMines === 2
+                                                  ? "#F59E0B"
+                                                  : "#EF4444",
                                     }}
                                 >
                                     {cell.adjacentMines}
