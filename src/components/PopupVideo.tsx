@@ -5,7 +5,7 @@ interface PopupVideoProps {
   src: string
   x: number
   y: number
-  onClose?: () => void
+  onClose?: (isAutoClose?: boolean) => void // isAutoClose: true 表示自動播完，false 表示手動關閉
   showCloseButton?: boolean
   autoCloseOnEnd?: boolean // 影片播完自動關閉
   loop?: boolean // 是否循環播放
@@ -14,6 +14,12 @@ interface PopupVideoProps {
 export function PopupVideo({ src, x, y, onClose, showCloseButton = false, autoCloseOnEnd = false, loop = false }: PopupVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isMobile] = useState(window.innerWidth < 600)
+  const onCloseRef = useRef(onClose)
+  
+  // 更新 onClose ref
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   // 確保位置不會超出螢幕
   const safeX = Math.min(Math.max(10, x), window.innerWidth - (isMobile ? 180 : 290))
@@ -27,16 +33,23 @@ export function PopupVideo({ src, x, y, onClose, showCloseButton = false, autoCl
   }, [])
 
   // 影片播完自動關閉
+  const hasCalledRef = useRef(false)
   useEffect(() => {
     if (!autoCloseOnEnd || !videoRef.current) return
 
     const video = videoRef.current
+    hasCalledRef.current = false // 重置標記
     const handleEnded = () => {
-      onClose?.()
+      if (hasCalledRef.current) return // 已經調用過，直接返回
+      hasCalledRef.current = true
+      onCloseRef.current?.(true) // true 表示自動播完
     }
     video.addEventListener('ended', handleEnded)
-    return () => video.removeEventListener('ended', handleEnded)
-  }, [autoCloseOnEnd, onClose])
+    return () => {
+      video.removeEventListener('ended', handleEnded)
+      hasCalledRef.current = false // 清理時重置
+    }
+  }, [autoCloseOnEnd]) // 移除 onClose 依賴，使用 ref
 
   return (
     <motion.div
@@ -58,7 +71,7 @@ export function PopupVideo({ src, x, y, onClose, showCloseButton = false, autoCl
     >
       {showCloseButton && (
         <motion.button
-          onClick={onClose}
+          onClick={() => onClose?.(false)} // false 表示手動關閉
           whileHover={{ scale: 1.1, background: '#F59E0B' }}
           whileTap={{ scale: 0.95 }}
           style={{

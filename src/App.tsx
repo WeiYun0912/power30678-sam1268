@@ -5,6 +5,7 @@ import { MemoryGame } from "./components/MemoryGame";
 import { QTEGame } from "./components/QTEGame";
 import { DragGame } from "./components/DragGame";
 import { WhackMoleGame } from "./components/WhackMoleGame";
+import { MinesweeperGame } from "./components/MinesweeperGame";
 import { Complete } from "./components/Complete";
 import { GameOver } from "./components/GameOver";
 import { GameStage } from "./types/game";
@@ -19,9 +20,12 @@ function App() {
     const [showQteDialog, setShowQteDialog] = useState(false);
     const [showDragDialog, setShowDragDialog] = useState(false);
     const [showWhackDialog, setShowWhackDialog] = useState(false);
+    const [showMinesweeperDialog, setShowMinesweeperDialog] = useState(false);
     const [memoryMaxFails, setMemoryMaxFails] = useState(3); // 預設 3 次機會
+    const [failedStage, setFailedStage] = useState<GameStage | null>(null); // 記錄失敗的關卡
 
     const handleStart = () => {
+        setFailedStage(null);
         setStage("memory");
         setShowMemoryDialog(true);
     };
@@ -34,6 +38,7 @@ function App() {
     const handleMemoryFail = () => {
         // 失敗後下次給多一次機會
         setMemoryMaxFails((prev) => Math.min(prev + 1, 5));
+        setFailedStage("memory");
         setStage("gameover");
     };
 
@@ -48,17 +53,60 @@ function App() {
     };
 
     const handleWhackComplete = () => {
+        setStage("minesweeper");
+        setShowMinesweeperDialog(true);
+    };
+
+    const handleMinesweeperComplete = () => {
         setStage("complete");
     };
 
+    const handleMinesweeperFail = () => {
+        setFailedStage("minesweeper");
+        setStage("gameover");
+    };
+
     const handleRestart = () => {
+        setFailedStage(null);
         setStage("menu");
     };
 
     const handleRetry = () => {
-        // 從失敗畫面重試，回到第一關
-        setStage("memory");
-        setShowMemoryDialog(true);
+        // 從失敗畫面重試，回到失敗的關卡
+        if (failedStage === "minesweeper") {
+            setStage("minesweeper");
+            setShowMinesweeperDialog(true);
+        } else {
+            // 預設回到第一關
+            setStage("memory");
+            setShowMemoryDialog(true);
+        }
+    };
+
+    const handleSelectLevel = (level: string) => {
+        // 根據選擇的關卡設置對應的 stage 和 dialog
+        switch (level) {
+            case "memory":
+                setStage("memory");
+                setShowMemoryDialog(true);
+                break;
+            case "qte":
+                setStage("qte");
+                setShowQteDialog(true);
+                break;
+            case "drag":
+                setStage("drag");
+                setShowDragDialog(true);
+                break;
+            case "whack":
+                setStage("whack");
+                setShowWhackDialog(true);
+                break;
+            case "minesweeper":
+                setStage("minesweeper");
+                setShowMinesweeperDialog(true);
+                break;
+        }
     };
 
     // 顯示載入畫面
@@ -70,7 +118,7 @@ function App() {
         <AnimatePresence mode="wait">
             {stage === "menu" && (
                 <motion.div key="menu" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    <Menu onStart={handleStart} />
+                    <Menu onStart={handleStart} onSelectLevel={handleSelectLevel} />
                 </motion.div>
             )}
 
@@ -148,6 +196,24 @@ function App() {
                         />
                     ) : (
                         <WhackMoleGame onComplete={handleWhackComplete} />
+                    )}
+                </motion.div>
+            )}
+
+            {stage === "minesweeper" && (
+                <motion.div key="minesweeper" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    {showMinesweeperDialog ? (
+                        <Dialog
+                            title="第五關：踩地雷"
+                            lines={[
+                                "點擊格子揭開，右鍵標記地雷。",
+                                "遊戲中會跳出干擾影片，必須在播完前關閉。",
+                                "三次未及時關閉干擾影片就會失敗！",
+                            ]}
+                            onStart={() => setShowMinesweeperDialog(false)}
+                        />
+                    ) : (
+                        <MinesweeperGame onComplete={handleMinesweeperComplete} onFail={handleMinesweeperFail} />
                     )}
                 </motion.div>
             )}

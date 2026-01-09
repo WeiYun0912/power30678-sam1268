@@ -2,9 +2,10 @@ import { motion } from "framer-motion";
 
 interface MenuProps {
     onStart: () => void;
+    onSelectLevel?: (level: string) => void;
 }
 
-export function Menu({ onStart }: MenuProps) {
+export function Menu({ onStart, onSelectLevel }: MenuProps) {
     return (
         <div
             style={{
@@ -140,14 +141,17 @@ export function Menu({ onStart }: MenuProps) {
                     }}
                 >
                     {[
-                        { level: "第一關", name: "記憶配對" },
-                        { level: "第二關", name: "QTE 挑戰" },
-                        { level: "第三關", name: "拉影片挑戰" },
-                        { level: "第四關", name: "打館長" },
+                        { level: "第一關", name: "記憶配對", stage: "memory" },
+                        { level: "第二關", name: "QTE 挑戰", stage: "qte" },
+                        { level: "第三關", name: "拉影片挑戰", stage: "drag" },
+                        { level: "第四關", name: "打館長", stage: "whack" },
+                        { level: "第五關", name: "踩地雷", stage: "minesweeper" },
                     ].map((item, i) => (
                         <motion.div
                             key={i}
-                            whileHover={{ scale: 1.02, borderColor: "rgba(255,255,255,0.15)" }}
+                            whileHover={{ scale: 1.05, borderColor: "rgba(245, 158, 11, 0.4)", boxShadow: "0 0 20px rgba(245, 158, 11, 0.2)" }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => onSelectLevel?.(item.stage)}
                             style={{
                                 padding: "clamp(10px, 2vw, 16px) clamp(14px, 3vw, 24px)",
                                 background: "rgba(26, 26, 36, 0.6)",
@@ -158,6 +162,7 @@ export function Menu({ onStart }: MenuProps) {
                                 fontSize: "clamp(12px, 3vw, 16px)",
                                 transition: "all 300ms ease-out",
                                 whiteSpace: "nowrap",
+                                cursor: onSelectLevel ? "pointer" : "default",
                             }}
                         >
                             <span style={{ color: "#F59E0B", fontWeight: 600 }}>{item.level}</span>
