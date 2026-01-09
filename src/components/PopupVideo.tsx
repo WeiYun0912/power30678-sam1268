@@ -15,6 +15,7 @@ export function PopupVideo({ src, x, y, onClose, showCloseButton = false, autoCl
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isMobile] = useState(window.innerWidth < 600)
   const onCloseRef = useRef(onClose)
+  const hasCalledRef = useRef(false) // 移到組件層級
   
   // 更新 onClose ref
   useEffect(() => {
@@ -33,7 +34,6 @@ export function PopupVideo({ src, x, y, onClose, showCloseButton = false, autoCl
   }, [])
 
   // 影片播完自動關閉
-  const hasCalledRef = useRef(false)
   useEffect(() => {
     if (!autoCloseOnEnd || !videoRef.current) return
 

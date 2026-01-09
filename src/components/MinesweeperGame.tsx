@@ -72,11 +72,20 @@ export function MinesweeperGame({ onComplete, onFail }: MinesweeperGameProps) {
     const explodeVideoRef = useRef<HTMLVideoElement>(null);
     const [popupVideos, setPopupVideos] = useState<PopupVideoState[]>([]);
     const [missedDistractions, setMissedDistractions] = useState(0); // 未關閉的干擾影片次數
+    
+    // 計算已標記的旗子數量
+    const flaggedCount = cells.reduce((count, row) => {
+        return count + row.filter((cell) => cell.isFlagged).length;
+    }, 0);
+    
+    // 計算剩餘炸彈數
+    const remainingMines = MINE_COUNT - flaggedCount;
     const popupIdRef = useRef(0);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 600);
     const distractionTimerRef = useRef<number>();
     const gameStateRef = useRef({ gameOver: false, gameWon: false });
     const processedVideoIdsRef = useRef<Set<number>>(new Set()); // 追蹤已經處理過的影片 ID
+    const failureCountedRef = useRef<Set<number>>(new Set()); // 追蹤已經計算過失敗的影片 ID
 
     // 監聽視窗大小變化
     useEffect(() => {
@@ -147,6 +156,7 @@ export function MinesweeperGame({ onComplete, onFail }: MinesweeperGameProps) {
         setMissedDistractions(0);
         setPopupVideos([]);
         processedVideoIdsRef.current.clear();
+        failureCountedRef.current.clear();
     };
 
     // 隨機跳出干擾影片
@@ -207,25 +217,31 @@ export function MinesweeperGame({ onComplete, onFail }: MinesweeperGameProps) {
             return;
         }
         
-        // 先標記為已處理，避免在 setPopupVideos 執行期間被重複調用
+        // 先標記為已處理，避免在執行期間被重複調用
         processedVideoIdsRef.current.add(id);
         
+        // 使用函數式更新來獲取最新狀態
         setPopupVideos((prev: PopupVideoState[]) => {
             const video = prev.find((v: PopupVideoState) => v.id === id);
             if (!video) return prev; // 影片已經被移除，直接返回
             
-            // 只有干擾影片且自動播完才扣分
-            if (video.isDistraction && isAutoClose === true) {
-                // 計算失敗
-                setMissedDistractions((prevMissed: number) => {
-                    const newMissed = prevMissed + 1;
-                    if (newMissed >= 3) {
-                        setGameOver(true);
-                        gameStateRef.current.gameOver = true;
-                        setTimeout(() => onFail(), 1000);
-                    }
-                    return newMissed;
-                });
+            // 只有干擾影片且自動播完才扣分，且還沒計算過失敗
+            if (video.isDistraction && isAutoClose === true && !failureCountedRef.current.has(id)) {
+                // 標記為已計算失敗
+                failureCountedRef.current.add(id);
+                
+                // 在 setPopupVideos 外部計算失敗，使用 setTimeout 確保只執行一次
+                setTimeout(() => {
+                    setMissedDistractions((prevMissed: number) => {
+                        const newMissed = prevMissed + 1;
+                        if (newMissed >= 3) {
+                            setGameOver(true);
+                            gameStateRef.current.gameOver = true;
+                            setTimeout(() => onFail(), 1000);
+                        }
+                        return newMissed;
+                    });
+                }, 0);
             }
             
             // 移除影片
@@ -535,8 +551,13 @@ export function MinesweeperGame({ onComplete, onFail }: MinesweeperGameProps) {
                         踩地雷挑戰
                     </motion.h2>
                 )}
-                <div style={{ color: "#D4D4D8", fontSize: "clamp(12px, 3vw, 14px)" }}>
-                    未關閉：<span style={{ color: missedDistractions >= 2 ? "#EF4444" : "#F59E0B", fontWeight: 700 }}>{missedDistractions}</span> / 3
+                <div style={{ display: "flex", gap: isMobile ? 8 : 12, flexWrap: "wrap", justifyContent: "center" }}>
+                    <div style={{ color: "#D4D4D8", fontSize: "clamp(12px, 3vw, 14px)" }}>
+                        未關閉：<span style={{ color: missedDistractions >= 2 ? "#EF4444" : "#F59E0B", fontWeight: 700 }}>{missedDistractions}</span> / 3
+                    </div>
+                    <div style={{ color: "#D4D4D8", fontSize: "clamp(12px, 3vw, 14px)" }}>
+                        剩餘炸彈：<span style={{ color: "#F59E0B", fontWeight: 700 }}>{remainingMines}</span>
+                    </div>
                 </div>
             </div>
 
