@@ -36,6 +36,7 @@ export function VolumeProvider({ children }: { children: ReactNode }) {
     return <VolumeContext.Provider value={{ volume, setVolume }}>{children}</VolumeContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useVolume() {
     const context = useContext(VolumeContext);
     if (context === undefined) {

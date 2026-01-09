@@ -80,9 +80,9 @@ export function DragGame({ onComplete }: DragGameProps) {
             video.addEventListener("ended", handleEnded);
             return () => video.removeEventListener("ended", handleEnded);
         }
-    }, [phase]);
+    }, [phase, volume]);
 
-    // 監聽音量變化，更新開場影片音量
+    // 監聽音量變化，更新開場影片音量（當影片已經在播放時）
     useEffect(() => {
         if (phase === "intro" && introVideoRef.current) {
             introVideoRef.current.volume = volume;
