@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useVolume } from "../contexts/VolumeContext";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -34,6 +35,7 @@ export function DragGame({ onComplete }: DragGameProps) {
     const [draggingId, setDraggingId] = useState<number | null>(null); // 正在拖拉的影片 ID
     const introVideoRef = useRef<HTMLVideoElement>(null);
     const bonusVideoRef = useRef<HTMLVideoElement>(null);
+    const { volume } = useVolume();
     const animationRef = useRef<number>();
     const videoIdRef = useRef(0);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 600);
@@ -67,10 +69,10 @@ export function DragGame({ onComplete }: DragGameProps) {
     // 播放開場影片
     useEffect(() => {
         if (phase === "intro" && introVideoRef.current) {
-            introVideoRef.current.volume = 0.3;
-            introVideoRef.current.play().catch(() => {});
-
             const video = introVideoRef.current;
+            video.volume = volume;
+            video.play().catch(() => {});
+
             const handleEnded = () => {
                 // 影片播完直接開始遊戲
                 setPhase("playing");
@@ -78,7 +80,14 @@ export function DragGame({ onComplete }: DragGameProps) {
             video.addEventListener("ended", handleEnded);
             return () => video.removeEventListener("ended", handleEnded);
         }
-    }, [phase]);
+    }, [phase, volume]);
+
+    // 監聽音量變化，更新開場影片音量（當影片已經在播放時）
+    useEffect(() => {
+        if (phase === "intro" && introVideoRef.current) {
+            introVideoRef.current.volume = volume;
+        }
+    }, [volume, phase]);
 
     // 生成新影片（確保在邊界內）
     const spawnVideo = useCallback(() => {
@@ -224,7 +233,7 @@ export function DragGame({ onComplete }: DragGameProps) {
         // 播放影片
         setTimeout(() => {
             if (bonusVideoRef.current) {
-                bonusVideoRef.current.volume = 0.35;
+                bonusVideoRef.current.volume = volume;
                 bonusVideoRef.current.play().catch(() => {});
             }
         }, 100);
@@ -250,7 +259,7 @@ export function DragGame({ onComplete }: DragGameProps) {
         setTimeout(() => {
             setShowBonusVideo(false);
         }, 3000);
-    }, [bonusUsed, onComplete]);
+    }, [bonusUsed, onComplete, volume]);
 
     return (
         <div
@@ -565,13 +574,14 @@ function DraggableVideoItem({ video, videoSize, onDragStart, onDragEnd }: Dragga
     const elementRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
     const dragStartRef = useRef({ mouseX: 0, mouseY: 0, elemX: 0, elemY: 0 });
+    const { volume } = useVolume();
 
     useEffect(() => {
         if (videoRef.current) {
-            videoRef.current.volume = 0.15; // 小聲播放
+            videoRef.current.volume = volume;
             videoRef.current.play().catch(() => {});
         }
-    }, []);
+    }, [volume]);
 
     const handlePointerDown = (e: React.PointerEvent) => {
         e.preventDefault();

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PopupVideo } from "./PopupVideo";
+import { useVolume } from "../contexts/VolumeContext";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -64,6 +65,7 @@ function getRandomPosition() {
 }
 
 export function MinesweeperGame({ onComplete, onFail }: MinesweeperGameProps) {
+    const { volume } = useVolume();
     const [cells, setCells] = useState<Cell[][]>([]);
     const [gameOver, setGameOver] = useState(false);
     const [gameWon, setGameWon] = useState(false);
@@ -672,7 +674,7 @@ export function MinesweeperGame({ onComplete, onFail }: MinesweeperGameProps) {
                             autoPlay
                             muted={false}
                             onLoadedMetadata={(e: React.SyntheticEvent<HTMLVideoElement>) => {
-                                (e.target as HTMLVideoElement).volume = 0.3;
+                                (e.target as HTMLVideoElement).volume = volume;
                             }}
                             style={{
                                 width: "clamp(180px, 40vw, 280px)",
